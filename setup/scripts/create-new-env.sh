@@ -96,9 +96,11 @@ if [ -f "$dir/$output" ]; then
         quit
     fi
 else
-    echo "--"
-    has_confirmed=$(confirm "Should we update references to the env file across the project? (Y/N) ")
-    should_update_references=$has_confirmed
+    if [[ $output != ".custom.env" ]]; then
+        echo "--"
+        has_confirmed=$(confirm "Should we update references to the env file across the project? (Y/N) ")
+        should_update_references=$has_confirmed
+    fi
 fi
 
 if [[ $mode == "S" ]]; then
@@ -149,7 +151,7 @@ if [[ $mode == "S" ]]; then
 fi
 
 if [[ $mode == "C" ]]; then
-    variables=$(find ./app -type f ! -path "*app/dependencies*" -name "*.php" -exec cat {} \; | grep -oE "Options::get\('[A-Z_]+'\)" | sed -E "s/.*\('(.+)'\)/\1/g")
+    variables=$(find ./app -type f ! -path "*app/dependencies*" -name "*.php" -exec cat { } \; | grep -oE "Options::get\('[A-Z_]+'\)" | sed -E "s/.*\('(.+)'\)/\1/g")
     while IFS= read -r line; do
         # Get key (each line is in the form of ^KEY$)
         key=$line
