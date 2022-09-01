@@ -26,5 +26,10 @@
   "require-dev": {
     "vimeo/psalm": "5.x-dev",
     "phpunit/phpunit": "^9"
+  },
+  "scripts": {
+    "post-root-package-install": [
+      "./setup/scripts/run.sh"
+    ]
   }
 }
