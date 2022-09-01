@@ -1,5 +1,8 @@
 version: '3.3'
 
+networks:
+  ezekiel
+
 services:
   ezekiel-web:
     image: 'nginx:stable-alpine'
@@ -15,7 +18,7 @@ services:
     ports:
       - 2600:80
     networks:
-     - global
+     - ezekiel
 
   ezekiel-db:
     image: postgres:12.1
@@ -30,7 +33,7 @@ services:
     volumes:
       - ./setup/database/db.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - global
+      - ezekiel
 
   ezekiel-fpm:
     image: adriel/boilerplate-php-fpm
@@ -42,8 +45,4 @@ services:
     expose:
       - 9000
     networks:
-      - global
-
-networks:
-  global:
-    external: true
+      - ezekiel
