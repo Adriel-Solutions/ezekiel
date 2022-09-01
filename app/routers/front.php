@@ -8,6 +8,5 @@
     class Front extends Router {
         protected function load() : void
         {
-
         }
     }

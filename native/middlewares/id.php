@@ -22,7 +22,7 @@
             $this->fallback = front_path('/');
 
             // Merge
-            foreach([ 'type' , 'fallback' ] as $k) {
+            foreach([  'for' , 'type' , 'fallback' ] as $k) {
                 if(!isset($params[$k])) continue;
                 $this->$k = $params[$k];
             }
@@ -30,7 +30,6 @@
 
         public function __invoke($req, $res, &$next) {
             $id = $req->params[0];
-
 
             // Good Case 1 : Encryption enabled -> No test can be done, ids are UUIDs
             // Potential @TODO : Test UUID format

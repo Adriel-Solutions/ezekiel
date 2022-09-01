@@ -32,7 +32,7 @@
             $this->header = null;
 
             // Merge
-            foreach([ 'type' , 'table' , 'name' , 'header' ] as $k) {
+            foreach([ 'type' , 'table' , 'name' , 'header' , 'for' , 'column' ] as $k) {
                 if(!isset($params[$k])) continue;
                 $this->$k = $params[$k];
             }

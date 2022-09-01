@@ -24,6 +24,8 @@
             // Default error handler
             $this->set_error_handler(function($req, $res, &$next, $error) {
                 if(Options::get('MODE') !== 'DEBUG') {
+                    error_log($error);
+
                     $res->render([
                         'view' => '/pages/errors/500',
                     ]);
