@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="5"
+    resolveFromConfigFile="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+
+    autoloader="../../native/autoloader.php"
+>
+    <extraFiles>
+        <file name="../../native/libs/Sugar.php" />
+    </extraFiles>
+
+    <projectFiles>
+        <!-- native-related -->
+        <file name="../../native/autoloader.php" />
+        <file name="../../native/index.php" />
+        <directory name="../../native/bin" />
+        <directory name="../../native/libs" />
+
+        <!-- App-related -->
+        <directory name="../../app/adapters" />
+        <directory name="../../app/controllers" />
+        <directory name="../../app/jobs" />
+        <directory name="../../app/middlewares" />
+        <directory name="../../app/routers" />
+        <directory name="../../app/services" />
+
+        <!-- IGNORE THESE -->
+        <!-- Can't figure how to have Psalm find global required variables / functions -->
+        <ignoreFiles>
+            <directory name="../../app/dependencies" />
+            <directory name="../../app/views" />
+            <directory name="../../app/thirdparties" />
+            <directory name="../../app/translations" />
+            <file name="../../native/libs/Sugar.php" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <!-- SYNTACTICAL SUGARS -->
+    <stubs>
+        <file name="../../native/libs/Sugar.php" />
+        <file name="../../native/index.php" />
+    </stubs>
+
+    <!-- IGNORES -->
+    <issueHandlers>
+        <InvalidArrayOffset errorLevel="suppress"/>
+
+        <InvalidArgument>
+                <errorLevel type="suppress">
+                    <file name="../../native/index.php" />
+                </errorLevel>
+        </InvalidArgument>
+
+    </issueHandlers>
+
+</psalm>

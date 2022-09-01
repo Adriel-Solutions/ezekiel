@@ -1,0 +1,49 @@
+version: '3.3'
+
+services:
+  ezekiel-web:
+    image: 'nginx:stable-alpine'
+    container_name: "ezekiel-web"
+    restart: always
+    depends_on:
+      - ezekiel-db
+      - ezekiel-fpm
+    volumes:
+      - .:/app
+      - ./docker/nginx/app.conf:/etc/nginx/conf.d/default.conf
+      - ./logs/nginx:/var/log/nginx
+    ports:
+      - 2600:80
+    networks:
+     - global
+
+  ezekiel-db:
+    image: postgres:12.1
+    container_name: "ezekiel-db"
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - 5432
+    volumes:
+      - ./setup/database/db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - global
+
+  ezekiel-fpm:
+    image: adriel/boilerplate-php-fpm
+    container_name: "ezekiel-fpm"
+    hostname: nginx-fpm-host
+    volumes:
+      - .:/app
+      - ./logs/php:/var/log/php-fpm
+    expose:
+      - 9000
+    networks:
+      - global
+
+networks:
+  global:
+    external: true

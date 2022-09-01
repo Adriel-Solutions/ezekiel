@@ -1,0 +1,27 @@
+{
+  "name": "adriel/ezekiel",
+  "description": "Yet another PHP framework",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Adriel Solutions",
+      "email": "it@adriel.solutions"
+    }
+  ],
+  "autoload": {},
+  "minimum-stability": "dev",
+  "config": {
+    "vendor-dir": "app/dependencies",
+    "platform-check": false
+  },
+  "require": {
+    "phpmailer/phpmailer": "^6.5",
+    "aws/aws-sdk-php": "^3.233",
+    "filp/whoops": "^2.14"
+  },
+  "require-dev": {
+    "vimeo/psalm": "5.x-dev",
+    "phpunit/phpunit": "^9"
+  }
+}
