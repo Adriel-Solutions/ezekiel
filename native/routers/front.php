@@ -23,7 +23,7 @@
 
             // Default error handler
             $this->set_error_handler(function($req, $res, &$next, $error) {
-                if(Options::get('MODE') !== 'DEBUG') {
+                if('DEBUG' !== Options::get('MODE')) {
                     error_log($error);
 
                     $res->render([

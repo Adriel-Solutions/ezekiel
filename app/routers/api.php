@@ -21,18 +21,5 @@
             $this->use(native_mdw('form'));
             $this->use(native_mdw('signature'));
 
-            /**
-             * Setup default errors handler
-             */
-            $this->set_error_handler(function($req, $res, &$next, $err) {
-                $content = [];
-
-                if('DEBUG' === Options::get('MODE'))
-                    $content['error'] = strval($err);
-
-                $res->send_error([ 'content' => $content ]);
-
-                $next = false;
-            });
         }
     }

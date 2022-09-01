@@ -18,6 +18,20 @@
                 $res->send_not_found();
                 $next = false;
             });
+
+            // Default error handler
+            $this->set_error_handler(function($req, $res, &$next, $err) {
+                $content = [];
+
+                if('DEBUG' === Options::get('MODE'))
+                    $content['error'] = strval($err);
+                else 
+                    error_log($err);
+
+                $res->send_error([ 'content' => $content ]);
+
+                $next = false;
+            });
         }
     }
 
