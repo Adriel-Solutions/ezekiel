@@ -11,7 +11,7 @@
         }
 
         // @override
-        public function run(array $context) : ?string { return null; }
+        public function run(?array $context) : ?string { return null; }
 
         protected function report_progress(int|float $progress) : void {
             if(empty($this->id)) return;
