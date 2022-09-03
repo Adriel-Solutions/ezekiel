@@ -2,7 +2,7 @@
     
     namespace app\routers;
 
-    use native\libs\Options;
+    use native\libs\Hooks;
     use native\libs\Router;
 
     class Api extends Router {
@@ -21,5 +21,6 @@
             $this->use(native_mdw('form'));
             $this->use(native_mdw('signature'));
 
+            Hooks::fire('before_mount_api', $this);
         }
     }
