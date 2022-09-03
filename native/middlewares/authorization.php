@@ -1,5 +1,7 @@
 <?php
 
+    namespace native\middlewares;
+
     use native\libs\Middleware;
 
     class Authorization extends Middleware {

@@ -1,5 +1,7 @@
 <?php
 
+    namespace native\middlewares;
+
     use native\libs\Middleware;
     use native\libs\Service;
 
