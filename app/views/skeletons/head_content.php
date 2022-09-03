@@ -47,6 +47,8 @@
                         <?php endif; ?>
                     <?php elseif($script['type'] === 'external'): ?>
                         src="<?= $script['url'] ?>"
+                    <?php elseif($script['type'] === 'component'): ?>
+                        src="<?= front_asset_path('/scripts/components' . $script['url']) ?>"
                     <?php endif; ?>
 
                     <?php if(isset($script['loading'])): ?>
