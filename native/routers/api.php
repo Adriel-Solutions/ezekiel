@@ -3,13 +3,10 @@
 
     use native\libs\Router;
     use native\libs\Options;
-    use native\libs\Hooks;
 
     class Api extends Router {
         protected function load() {
             $this->set_prefix(Options::get('ROOT_API'));
-
-            Hooks::fire('before_mount_api', $this);
 
             $this->mount(new \app\routers\Api());
 

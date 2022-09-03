@@ -3,13 +3,10 @@
 
     use native\libs\Options;
     use native\libs\Router;
-    use native\libs\Hooks;
 
     class Front extends Router {
         protected function load() {
             $this->set_prefix(Options::get('ROOT_FRONT'));
-
-            Hooks::fire('before_mount_front', $this);
 
             $this->mount(new \app\routers\Front());
 

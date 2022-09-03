@@ -3,13 +3,10 @@
 
     use native\libs\Options;
     use native\libs\Router;
-    use native\libs\Hooks;
 
     class Webhooks extends Router {
         protected function load() {
             $this->set_prefix(Options::get('ROOT_WEBHOOKS'));
-
-            Hooks::fire('before_mount_webhooks', $this);
 
             $this->mount(new \app\routers\Webhooks());
 
