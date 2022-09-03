@@ -55,7 +55,7 @@
         /**
          * Defines the route prefix for this router
          *
-         * @param {string} $prefix : Le préfixe à définir
+         * @param {string} $prefix
          */
         public function set_prefix($prefix) {
             $this->routes_prefix = $prefix;
