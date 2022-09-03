@@ -29,7 +29,7 @@
   },
   "scripts": {
     "post-root-package-install": [
-      "./setup/scripts/run.sh"
+      "./setup/scripts/setup.sh"
     ]
   }
 }
