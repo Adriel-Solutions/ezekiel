@@ -1,6 +1,10 @@
 <?php
     namespace native\libs;
 
+    use native\collections\Services;
+    use native\collections\Thirdparties;
+    use native\collections\Adapters;
+
     /**
      * Base class inherited by every Controller
      *
@@ -8,14 +12,14 @@
      * identifier by an arbitrary name
      */
     class Controller {
-        protected array $adapters;
-        protected array $services;
-        protected array $thirdparties;
+        protected Adapters $adapters;
+        protected Services $services;
+        protected Thirdparties $thirdparties;
 
         public function __construct() {
-            $this->adapters = [];
-            $this->services = [];
-            $this->thirdparties = [];
+            $this->adapters = new Adapters();
+            $this->services = new Services();
+            $this->thirdparties = new Thirdparties();
 
             $this->load();
         }
@@ -32,7 +36,16 @@
          * @param {any} $instance : The instance of the Adapter to store
          */
         public function register(string $name, Adapter|Service|Thirdparty $instance) : void {
-            $class = get_parent_class($instance);
+            $parent_class = get_parent_class($instance);
+            $base_class = get_class($instance);
+
+            $class = empty($parent_class) ? $base_class : $parent_class;
+            $parts = explode('\\', $class);
+            $class = end($parts);
+
+            if(str_ends_with($class, 'y'))
+                $class = substr($class, 0, strlen($class) - 1) . 'ie';
+
             $internal_array = strtolower($class) . 's';
             $this->$internal_array[$name] = $instance;
         }
