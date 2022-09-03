@@ -3,8 +3,9 @@
     namespace native\thirdparties;
 
     use native\libs\Options;
+    use native\libs\Thirdparty;
 
-    class Uploads {
+    class Uploads extends Thirdparty {
         /**
          * Writes a file on disk in default uploads directory
          * @param {string} $name : The file name (with extension) to store the file to

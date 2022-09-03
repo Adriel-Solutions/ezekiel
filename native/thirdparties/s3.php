@@ -3,9 +3,10 @@
     namespace native\thirdparties;
 
     use native\libs\Options;
+    use native\libs\Thirdparty;
     use Throwable;
 
-    class S3 {
+    class S3 extends Thirdparty {
         private $client;
 
         private function setup_client() {
