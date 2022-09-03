@@ -42,7 +42,8 @@
     $modules = scandir($dir_modules);
     $modules_files = [];
     foreach($modules as $module) {
-        if(in_array($module, ['.' , '..' , '.gitkeep' ])) continue;
+        if(in_array($module, ['.' , '..'])) continue;
+        if(!is_dir($dir_modules . '/' . $module . '/migrations/')) continue;
         $module_files = scandir($dir_modules . '/' . $module . '/migrations/');
 
         foreach($module_files as $module_file) {
