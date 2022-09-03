@@ -9,6 +9,7 @@
     use native\libs\Controller;
     use native\libs\Job;
     use native\libs\Thirdparty;
+    use native\libs\Constants;
 
     function vd(...$x) {
         echo '<pre>';
@@ -32,7 +33,7 @@
     }
 
     function HMP($module, $key, $params = []) {
-        Render::partial($module, $key, $params);
+        Render::module_partial($module, $key, $params);
     }
 
     function HL($key, $params = []) {
@@ -86,7 +87,7 @@
      * @param {string} $str The string to sanitize before output
      * @return {string} The sanitized string
      */
-    function sanitize_before_output(string $str) : string {
+    function sanitize_before_output(?string $str) : string {
         if(empty($str)) return "";
         return htmlentities($str, ENT_QUOTES | ENT_HTML5);
     }
@@ -108,8 +109,26 @@
     /**
      * Simple and handy alias for sanitize_before_output()
      */
-    function _e(string $str) : null|string {
+    function _e(?string $str) : string {
         return sanitize_before_output($str);
+    }
+
+    /**
+     * Alias meant to be used in front 
+     */
+    function get_option(string $key) : mixed 
+    {
+        return Options::get($key);
+    }
+
+    function get_constant(string $key) : mixed 
+    {
+        return Constants::$$key;
+    }
+
+    function get_locales() : array 
+    {
+        return I18n::get_supported_locales();
     }
 
     /**
@@ -147,12 +166,23 @@
     }
 
     function _instantiate_from_module(string $namespace, string $module, string $category, string $name, array $parameters = []) : Adapter|Middleware|Controller|Router|Service|Thirdparty|Job {
+        $name = strtolower($name);
+        $name = str_replace('/', '\\', $name);
+
+        if(str_contains($name, '\\')) {
+            $parts = explode('\\', $name);
+            $last_name = ucfirst(array_pop($parts));
+            $name = join('\\', [ ...$parts , $last_name  ]);
+        } else { 
+            $name = ucfirst($name);
+        }
+
         $class = '\\' . join('\\', [ 
             strtolower($namespace),
             'modules',
             strtolower($module),
             strtolower($category),
-            ucfirst($name)
+            $name
         ]);
         $instance = new $class($parameters);
         return $instance;
@@ -183,3 +213,13 @@
     function module_trdp(string $module, string $name, array $parameters = [])    : Thirdparty    { return _instantiate_from_module('app', $module, 'thirdparties', $name, $parameters); }
     function module_router(string $module, string $name, array $parameters = [])  : Router        { return _instantiate_from_module('app', $module, 'routers', $name, $parameters); }
     function module_job(string $module, string $name, array $parameters = [])     : Job           { return _instantiate_from_module('app', $module, 'jobs', $name, $parameters); }
+
+    /**
+     * Convenient way to create a "default" service for a given table
+     */
+    function default_service(string $table) : Service
+    {
+        $s = new Service();
+        $s->set_table($table);
+        return $s;
+    }
