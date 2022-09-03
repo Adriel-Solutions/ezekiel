@@ -3,16 +3,21 @@
     namespace native\thirdparties;
 
     use native\libs\Options;
+    use native\libs\Thirdparty;
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
 
-    class Emails {
+    class Emails extends Thirdparty {
+        public function render_from_module($module, $key, $params = []) {
+            ob_start();
+            include __DIR__ . "/../../app/modules/" . $module . "/views/emails" . $key . ".php";
+            $output = ob_get_clean();
+            return $output;
+        }
+
         public function render($key, $params = []) {
             ob_start();
-            if(empty($params['module']))
-                include __DIR__ . "/../../app/views/emails" . $key . ".php";
-            else
-                include __DIR__ . "/../../app/modules/" . $params['module'] . "views/emails" . $key . ".php";
+            include __DIR__ . "/../../app/views/emails" . $key . ".php";
             $output = ob_get_clean();
             return $output;
         }
@@ -57,8 +62,8 @@
 
                 return true;
             } catch (Exception $e) {
+                var_dump($e);
                 return false;
             }
         }
     }
-
