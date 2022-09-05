@@ -151,7 +151,7 @@ if [[ $mode == "S" ]]; then
 fi
 
 if [[ $mode == "C" ]]; then
-    variables=$(find ./app -type f ! -path "*app/dependencies*" -name "*.php" -exec cat { } \; | grep -oE "Options::get\('[A-Z_]+'\)" | sed -E "s/.*\('(.+)'\)/\1/g")
+    variables=$(find ./app -type f -name "*.php" -exec cat { } \; | grep -oE "Options::get\('[A-Z_]+'\)" | sed -E "s/.*\('(.+)'\)/\1/g")
     while IFS= read -r line; do
         # Get key (each line is in the form of ^KEY$)
         key=$line

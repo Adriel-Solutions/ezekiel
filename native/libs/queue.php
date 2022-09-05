@@ -92,7 +92,7 @@
         }
 
         public function persist() : void {
-            $service = new \native\services\Jobs();
+            $service = default_service('jobs');
 
             $row = [
                 'class' => $this->job,

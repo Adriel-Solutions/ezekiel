@@ -6,9 +6,9 @@ VagrantFile
 !configuration/sample.env
 uploads
 
-app/dependencies/
-!/app/dependencies/.gitkeep
-!/app/dependencies/readme.md
+dependencies/
+!dependencies/.gitkeep
+!dependencies/readme.md
 private.*
 
 *.cache

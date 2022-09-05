@@ -817,7 +817,7 @@
          * @param {array} $payload The new key-values to set for the identified entry
          * @return {array} The updated entry, as an associative array
          */
-        public function update($id, $payload) 
+        public function update(int|string $id, array $payload) : array|Record
         {
             $table = $this->_determine_table_for('write');
 

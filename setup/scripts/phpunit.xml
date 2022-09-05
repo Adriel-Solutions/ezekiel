@@ -1,4 +1,4 @@
-<phpunit bootstrap="../../app/dependencies/autoload.php">
+<phpunit bootstrap="../../dependencies/autoload.php">
     <testsuites>
         <testsuite name="all">
             <directory suffix=".php">../../native/tests/</directory>

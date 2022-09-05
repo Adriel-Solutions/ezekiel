@@ -7,7 +7,7 @@
     /**
      * External Dependencies
      */
-    require DIR_APP . '/dependencies/autoload.php';
+    require DIR_ROOT . '/dependencies/autoload.php';
 
     /**
      * Local Autoloader

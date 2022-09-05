@@ -30,7 +30,7 @@
         <!-- IGNORE THESE -->
         <!-- Can't figure how to have Psalm find global required variables / functions -->
         <ignoreFiles>
-            <directory name="../../app/dependencies" />
+            <directory name="../../dependencies" />
             <directory name="../../app/views" />
             <directory name="../../app/thirdparties" />
             <directory name="../../app/translations" />

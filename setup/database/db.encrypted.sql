@@ -28,12 +28,14 @@ CREATE TABLE jobs (
     is_running BYTEA NOT NULL,
     is_unique BYTEA NOT NULL,
     context BYTEA NOT NULL,
+    report BYTEA NULL DEFAULT NULL,
+    progress BYTEA NULL DEFAULT NULL,
 
-    scheduled_for BYTEA NOT NULL,
-    schedule_frequency BYTEA NOT NULL,
-    schedule_unit BYTEA NOT NULL,
+    scheduled_for BYTEA NULL DEFAULT NULL,
+    schedule_frequency BYTEA NULL DEFAULT NULL,
+    schedule_unit BYTEA NULL DEFAULT NULL,
 
-    last_run_at BYTEA NOT NULL,
+    last_run_at BYTEA NULL DEFAULT NULL,
     created_at BYTEA NOT NULL,
 
     PRIMARY KEY (pk)

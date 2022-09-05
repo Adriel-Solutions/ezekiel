@@ -15,7 +15,7 @@
   },
   "minimum-stability": "dev",
   "config": {
-    "vendor-dir": "app/dependencies",
+    "vendor-dir": "./dependencies",
     "platform-check": false
   },
   "require": {

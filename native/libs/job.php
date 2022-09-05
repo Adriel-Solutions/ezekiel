@@ -16,7 +16,7 @@
         protected function report_progress(int|float $progress) : void {
             if(empty($this->id)) return;
 
-            $service = new \native\services\Jobs();
+            $service = default_service('jobs');
             $service->update($this->id, [ 'progress' => $progress ]);
         }
     }
