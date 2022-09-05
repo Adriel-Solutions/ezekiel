@@ -1,19 +1,28 @@
-<?php 
+<?php
     declare(strict_types=1);
 
+    use native\facades\Service;
+    use native\libs\Options;
+    use native\libs\Database;
     use PHPUnit\Framework\TestCase;
 
     require_once __DIR__ . '/../autoloader.php';
 
-    use native\libs\Service;
-    use native\libs\Database;
-    use native\libs\Options;
+    class TestsParents extends Service {  }
+    class TestsPets extends Service {  }
+    class TestsChildren extends Service {
+        protected array $relations = [
+            'parent_1' => [ 'type' => 'ONE-TO-ONE' , 'table' => 'tests_parents' , 'local_column' => 'fk_parent_1' ],
+            'parent_2' => [ 'type' => 'ONE-TO-ONE' , 'table' => 'tests_parents' , 'local_column' => 'fk_parent_2' ],
+            'friends' => [ 'type' => 'MANY-TO-MANY' , 'table' => 'tests_children' ,  'dictionary' => 'tests_children_friends' , 'local_column' => 'fk_child_1' , 'foreign_column' => 'fk_child_2' ],
+            'pets' => [ 'type' => 'MANY-TO-ONE' , 'table' => 'tests_pets' ,  'foreign_column' => 'fk_child' ]
+        ];
+    }
+    class TestsChildrenFriends extends Service {  }
 
-    final class ServiceTest extends TestCase
+
+    final class FacadeServiceTest extends TestCase
     {
-        private Service $s_parents;
-        private Service $s_children;
-
         public static function setUpBeforeClass() : void 
         {
             // Retrieve configuration
@@ -119,17 +128,6 @@
 
         protected function setUp() : void 
         {
-            // Setup services
-            $this->s_parents = new Service();
-            $this->s_parents->set_table('tests_parents');
-
-            $this->s_children = new Service();
-            $this->s_children->set_table('tests_children');
-            $this->s_children->set_relation('parent_1', [ 'type' => 'ONE-TO-ONE' , 'table' => 'tests_parents' , 'local_column' => 'fk_parent_1' ]);
-            $this->s_children->set_relation('parent_2', [ 'type' => 'ONE-TO-ONE' , 'table' => 'tests_parents' , 'local_column' => 'fk_parent_2' ]);
-            $this->s_children->set_relation('friends', [ 'type' => 'MANY-TO-MANY' , 'table' => 'tests_children' ,  'dictionary' => 'tests_children_friends' , 'local_column' => 'fk_child_1' , 'foreign_column' => 'fk_child_2' ]);
-            $this->s_children->set_relation('pets', [ 'type' => 'MANY-TO-ONE' , 'table' => 'tests_pets' ,  'foreign_column' => 'fk_child' ]);
-
             // Fill with data
             if(!Options::get('ENCRYPTION_ENABLED')) {
                 Database::query("DROP EXTENSION IF EXISTS pgcrypto;");
@@ -188,17 +186,17 @@
 
         public function testExists() : void
         {
-            $this->assertTrue($this->s_parents->exists(1));
-            $this->assertTrue($this->s_parents->exists(2));
-            $this->assertFalse($this->s_parents->exists(4));
+            $this->assertTrue(TestsParents::exists(1));
+            $this->assertTrue(TestsParents::exists(2));
+            $this->assertFalse(TestsParents::exists(4));
         }
 
         public function testExistsOne() : void
         {
-            $this->assertTrue($this->s_parents->exists_one([ 'name' => 'Joe' ]));
+            $this->assertTrue(TestsParents::exists_one([ 'name' => 'Joe' ]));
 
             $this->assertTrue(
-                $this->s_parents->exists_one([
+                TestsParents::exists_one([
                     [
                         'column' => 'name',
                         'operator' => '=',
@@ -208,7 +206,7 @@
             );
 
             $this->assertTrue(
-                $this->s_parents->exists_one([
+                TestsParents::exists_one([
                     [
                         'column' => 'name',
                         'operator' => 'IN',
@@ -218,7 +216,7 @@
             );
 
             $this->assertTrue(
-                $this->s_parents->exists_one([
+                TestsParents::exists_one([
                     [
                         'column' => 'name',
                         'operator' => 'LIKE',
@@ -232,12 +230,12 @@
         {
             $this->assertEquals(
                 [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ],
-                $this->s_parents->get('1')
+                TestsParents::get('1')
             );
 
             $this->assertEquals(
                 [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ],
-                $this->s_parents->get(1)
+                TestsParents::get(1)
             );
         }
 
@@ -245,7 +243,7 @@
         {
             $this->assertEquals(
                 3,
-                $this->s_parents->get_count()
+                TestsParents::get_count()
             );
         }
 
@@ -269,7 +267,7 @@
                         'age' => 48
                     ],
                 ],
-                $this->s_parents->get_all()
+                TestsParents::get_all()
             );
 
             $this->assertEquals(
@@ -290,7 +288,7 @@
                         'age' => 30
                     ],
                 ],
-                $this->s_parents->get_all([ 'order' => [ 'age' => 'DESC' ] ])
+                TestsParents::get_all([ 'order' => [ 'age' => 'DESC' ] ])
             );
 
             $this->assertEquals(
@@ -301,16 +299,16 @@
                         'age' => 48
                     ],
                 ],
-                $this->s_parents->get_all([  'per_page' => 1 , 'page' => 1,  'order' => [ 'age' => 'DESC' ] ])
+                TestsParents::get_all([  'per_page' => 1 , 'page' => 1,  'order' => [ 'age' => 'DESC' ] ])
             );
         }
 
         public function testDelete() : void
         {
-            $this->s_children->delete(1);
+            TestsChildren::delete(1);
             $this->assertEquals(
                 2,
-                $this->s_children->get_count()
+                TestsChildren::get_count()
             );
         }
 
@@ -318,33 +316,33 @@
         {
             $this->assertEquals(
                 [ 'pk' => 1 , 'name' => 'Lord Voldemort', 'age' => 2, 'fk_parent_1' => 1, 'fk_parent_2' => 2 ],
-                $this->s_children->update(1, [ 'name' => 'Lord Voldemort' ])
+                TestsChildren::update(1, [ 'name' => 'Lord Voldemort' ])
             );
 
             if(!Options::get('ENCRYPTION_ENABLED'))
                 $this->assertEquals(
                     [ 'pk' => 1 , 'name' => 'Lord Voldemort', 'age' => 18, 'fk_parent_1' => 1, 'fk_parent_2' => 2 ],
-                    $this->s_children->update(1, [ 'age' => '[age + 16]' ])
+                    TestsChildren::update(1, [ 'age' => '[age + 16]' ])
                 );
             else  {
                 $this->expectException(Exception::class);
-                $this->s_children->update(1, [ 'age' => '[age + 16]' ]);
+                TestsChildren::update(1, [ 'age' => '[age + 16]' ]);
             }
         }
 
         public function testFindAndDelete() : void
         {
-            $this->s_children->find_and_delete([ 'name' => 'Harry' ]);
+            TestsChildren::find_and_delete([ 'name' => 'Harry' ]);
 
             $this->assertEquals(
                 2,
-                $this->s_children->get_count()
+                TestsChildren::get_count()
             );
 
             if(Options::get('ENCRYPTION_ENABLED'))
                 $this->expectException(Exception::class);
 
-            $this->s_children->find_and_delete(
+            TestsChildren::find_and_delete(
                 [ 
                     [
                         'column' => '[LENGTH(name)]',
@@ -357,7 +355,7 @@
 
             $this->assertEquals(
                 0,
-                $this->s_children->get_count()
+                TestsChildren::get_count()
             );
         }
 
@@ -371,7 +369,7 @@
                     'fk_parent_1' => 1,
                     'fk_parent_2' => 2
                 ],
-                $this->s_children->find_one([])
+                TestsChildren::find_one([])
             );
 
             $this->assertEquals(
@@ -382,7 +380,7 @@
                     'fk_parent_1' => 1,
                     'fk_parent_2' => 2
                 ],
-                $this->s_children->find_one([ 'age' => 2 ])
+                TestsChildren::find_one([ 'age' => 2 ])
             );
 
             $this->assertEquals(
@@ -393,7 +391,7 @@
                     'fk_parent_1' => 1,
                     'fk_parent_2' => 2
                 ],
-                $this->s_children->find_one(
+                TestsChildren::find_one(
                     [
                         [
                             'column' => 'age',
@@ -420,32 +418,32 @@
         {
             $this->assertCount(
                 3,
-                $this->s_parents->find_all([])
+                TestsParents::find_all([])
             );
 
             $this->assertCount(
                 1,
-                $this->s_parents->find_all([], [ 'per_page' => 1 , 'page' => 1 ])
+                TestsParents::find_all([], [ 'per_page' => 1 , 'page' => 1 ])
             );
 
             $this->assertCount(
                 2,
-                $this->s_parents->find_all([], [ 'per_page' => 2 , 'page' => 1 ])
+                TestsParents::find_all([], [ 'per_page' => 2 , 'page' => 1 ])
             );
 
             $this->assertCount(
                 1,
-                $this->s_parents->find_all([], [ 'per_page' => 2 , 'page' => 2 ])
+                TestsParents::find_all([], [ 'per_page' => 2 , 'page' => 2 ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ] ],
-                $this->s_parents->find_all([], [ 'per_page' => 1 , 'page' => 1 , 'order' => [ 'pk' => 'ASC' ] ])
+                TestsParents::find_all([], [ 'per_page' => 1 , 'page' => 1 , 'order' => [ 'pk' => 'ASC' ] ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 3 , 'name' => 'Paul' , 'age' => 48 ] ],
-                $this->s_parents->find_all([], [ 'per_page' => 1 , 'page' => 1 , 'order' => [ 'pk' => 'DESC' ] ])
+                TestsParents::find_all([], [ 'per_page' => 1 , 'page' => 1 , 'order' => [ 'pk' => 'DESC' ] ])
             );
         }
 
@@ -453,22 +451,22 @@
         {
             $this->assertEquals(
                 3,
-                $this->s_parents->find_count([])
+                TestsParents::find_count([])
             );
 
             $this->assertEquals(
                 1,
-                $this->s_parents->find_count([ 'pk' => 1 ])
+                TestsParents::find_count([ 'pk' => 1 ])
             );
 
             $this->assertEquals(
                 3,
-                $this->s_parents->find_count([ [ 'column' => 'age' , 'operator' => '>' , 'value' => 1 ] ])
+                TestsParents::find_count([ [ 'column' => 'age' , 'operator' => '>' , 'value' => 1 ] ])
             );
 
             $this->assertEquals(
                 0,
-                $this->s_parents->find_count([ [ 'column' => 'pk' , 'value' => 1 ], [ 'column' => 'pk' , 'value' => 2 ] ])
+                TestsParents::find_count([ [ 'column' => 'pk' , 'value' => 1 ], [ 'column' => 'pk' , 'value' => 2 ] ])
             );
         }
 
@@ -476,37 +474,37 @@
         {
             $this->assertEquals(
                 [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ],
-                $this->s_parents->get_many([ 'order' => [ 'pk' => 'ASC' ] ])[0]
+                TestsParents::get_many([ 'order' => [ 'pk' => 'ASC' ] ])[0]
             );
 
             $this->assertEquals(
                 [ 'pk' => 3 , 'name' => 'Paul' , 'age' => 48 ],
-                $this->s_parents->get_many([ 'order' => [ 'pk' => 'DESC' ] ])[0]
+                TestsParents::get_many([ 'order' => [ 'pk' => 'DESC' ] ])[0]
             );
 
             $this->assertEquals(
                 [ 'pk' => 2 , 'name' => 'Jane' , 'age' => 34 ],
-                $this->s_parents->get_many([  'page' => 2 ,  'per_page' => 1, 'order' => [ 'pk' => 'DESC' ] ])[0]
+                TestsParents::get_many([  'page' => 2 ,  'per_page' => 1, 'order' => [ 'pk' => 'DESC' ] ])[0]
             );
 
             $this->assertCount(
                 1,
-                $this->s_parents->get_many([ 'page' => 1 ,  'per_page' => 1 ])
+                TestsParents::get_many([ 'page' => 1 ,  'per_page' => 1 ])
             );
 
             $this->assertCount(
                 1,
-                $this->s_parents->get_many([ 'page' => 3 ,  'per_page' => 1 ])
+                TestsParents::get_many([ 'page' => 3 ,  'per_page' => 1 ])
             );
         }
 
         public function testPopulate() : void
         {
-            $child = $this->s_children->get(1);
-            $this->s_children->populate($child, 'parent_1');
-            $this->s_children->populate($child, 'parent_2');
-            $this->s_children->populate($child, 'friends');
-            $this->s_children->populate($child, 'pets');
+            $child = TestsChildren::get(1);
+            TestsChildren::populate($child, 'parent_1');
+            TestsChildren::populate($child, 'parent_2');
+            TestsChildren::populate($child, 'friends');
+            TestsChildren::populate($child, 'pets');
 
             $this->assertEquals(
                 [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ],
@@ -566,27 +564,27 @@
         {
             $this->assertEquals(
                 [ [ 'pk' => 1 , 'name' => 'Merlin' , 'age' => 30 ] ],
-                $this->s_parents->find_and_update([ 'pk' => 1 ], [ 'name' => 'Merlin' ])
+                TestsParents::find_and_update([ 'pk' => 1 ], [ 'name' => 'Merlin' ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 2 , 'name' => 'Eva' , 'age' => 60 ] ],
-                $this->s_parents->find_and_update([ 'pk' => 2 ], [ 'name' => 'Eva' , 'age' => 60 ])
+                TestsParents::find_and_update([ 'pk' => 2 ], [ 'name' => 'Eva' , 'age' => 60 ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 1 , 'name' => 'Zombie' , 'age' => 100 ] , [ 'pk' => 2 , 'name' => 'Zombie' , 'age' => 100 ] ],
-                $this->s_parents->find_and_update([ 'pk' => [ 1 , 2 ] ], [ 'name' => 'Zombie' , 'age' => 100 ])
+                TestsParents::find_and_update([ 'pk' => [ 1 , 2 ] ], [ 'name' => 'Zombie' , 'age' => 100 ])
             );
 
             if(!Options::get('ENCRYPTION_ENABLED'))
                 $this->assertEquals(
                     [ [ 'pk' => 1 , 'name' => 'Zombie' , 'age' => 200 ] , [ 'pk' => 2 , 'name' => 'Zombie' , 'age' => 200 ] ],
-                    $this->s_parents->find_and_update([ 'pk' => [ 1 , 2 ] ], [ 'age' => '[age + 100]' ])
+                    TestsParents::find_and_update([ 'pk' => [ 1 , 2 ] ], [ 'age' => '[age + 100]' ])
                 );
             else {
                 $this->expectException(Exception::class);
-                $this->s_parents->find_and_update([ 'pk' => [ 1 , 2 ] ], [ 'age' => '[age + 100]' ]);
+                TestsParents::find_and_update([ 'pk' => [ 1 , 2 ] ], [ 'age' => '[age + 100]' ]);
             }
         }
 
@@ -594,38 +592,38 @@
         {
             $this->assertCount(
                 3,
-                $this->s_parents->find_many([])
+                TestsParents::find_many([])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ] ],
-                $this->s_parents->find_many([ 'pk' => 1 ])
+                TestsParents::find_many([ 'pk' => 1 ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ] , [ 'pk' => 2 , 'name' => 'Jane' , 'age' => 34] ],
-                $this->s_parents->find_many([ 'pk' => [ 1 , 2 ] ])
+                TestsParents::find_many([ 'pk' => [ 1 , 2 ] ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 1 , 'name' => 'Joe' , 'age' => 30 ] ],
-                $this->s_parents->find_many([ 'pk' => [ 1 , 2 ] ], [ 'page' => 1 , 'per_page' => 1 ])
+                TestsParents::find_many([ 'pk' => [ 1 , 2 ] ], [ 'page' => 1 , 'per_page' => 1 ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 2 , 'name' => 'Jane' , 'age' => 34 ] ],
-                $this->s_parents->find_many([ 'pk' => [ 1 , 2 ] ], [ 'page' => 1 , 'per_page' => 1, 'order' => [ 'pk' => 'DESC' ] ])
+                TestsParents::find_many([ 'pk' => [ 1 , 2 ] ], [ 'page' => 1 , 'per_page' => 1, 'order' => [ 'pk' => 'DESC' ] ])
             );
 
             $this->assertEquals(
                 [ [ 'pk' => 2 , 'name' => 'Jane' , 'age' => 34 ] ],
-                $this->s_parents->find_many([ 'pk' => [ 1 , 2 ] ], [ 'page' => 1 , 'per_page' => 1, 'order' => [ 'name' => 'ASC' ] ])
+                TestsParents::find_many([ 'pk' => [ 1 , 2 ] ], [ 'page' => 1 , 'per_page' => 1, 'order' => [ 'name' => 'ASC' ] ])
             );
         }
 
         public function testUseRecords() : void
         {
-            $parents = $this->s_parents->as_records()->get_all();
+            $parents = TestsParents::as_records()->get_all();
 
             $this->assertEquals(
                 1,
