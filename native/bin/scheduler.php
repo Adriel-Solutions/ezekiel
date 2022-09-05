@@ -42,7 +42,7 @@
 
     // Entrypoint
     // ----------
-    $service = native_srvc('jobs');
+    $service = default_service('jobs');
     $jobs = $service->get_all();
 
     if ( empty($jobs) )
