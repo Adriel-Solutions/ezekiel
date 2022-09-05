@@ -102,8 +102,11 @@
          * Accessors
          */
         public function set_table(string $t) : void { $this->table = $t; }
-        public function get_schema() : array { return $this->schema; }
+        public function get_table() : string { return $this->table; }
+
         public function set_schema(array $schema) : void { $this->schema = $schema; }
+        public function get_schema() : array { return $this->schema; }
+
         public function set_relation($name, $relation) : void { $this->relations[$name] = $relation; }
         public function as_records() : static { $this->is_record_asked = true; return $this; }
 
@@ -520,7 +523,7 @@
                 return new Record($result, $this);
 
             // Multiple rows -> Array of Record
-            return array_map(function($r) { return new Record($r, $this); }, $result);
+            return array_map(fn($r) => new Record($r, $this),  $result);
         }
 
         /**
