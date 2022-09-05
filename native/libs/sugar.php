@@ -10,6 +10,7 @@
     use native\libs\Job;
     use native\libs\Thirdparty;
     use native\libs\Constants;
+    use native\libs\Module;
 
     function vd(mixed ...$x) : void
     {
@@ -18,11 +19,17 @@
         echo '</pre>';
     }
 
+    /**
+     * Turns MyClassName into my_class_name
+     */
     function decamelize(string $str) : string
     {
         return strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $str));
     }
 
+    /**
+     * Turns \Namespace\Substuff\DeepPath\Class into Class
+     */
     function without_namespace(string $str) : string
     {
         $tmp = explode('\\', $str);
@@ -217,7 +224,7 @@
     function router(string $name, array $parameters = []) : Router        { return _instantiate('app', 'routers', $name, $parameters); }
     function job(string $name, array $parameters = [])    : Job           { return _instantiate('app', 'jobs', $name, $parameters); }
 
-    function module($name, $parameters = []) { return _instantiate_module('app', $name, $parameters); }
+    function module(string $name, array $parameters = []) : Module { return _instantiate_module('app', $name, $parameters); }
 
     function module_mdw(string $module, string $name, array $parameters = [])     : Middleware    { return _instantiate_from_module('app', $module, 'middlewares', $name, $parameters); }
     function module_ctrl(string $module, string $name, array $parameters = [])    : Controller    { return _instantiate_from_module('app', $module, 'controllers', $name, $parameters); }
