@@ -584,6 +584,30 @@
             return empty($rows) ? false : true;
         }
 
+        public function pluck(string $column, array $conditions = [], array $page_parameters = []) : array
+        {
+            $table = $this->_determine_table_for('read');
+
+            $where_str = $this->_build_where_str($conditions, $page_parameters['strict_search'] ?? true);
+            $where_payload = $this->_build_query_payload($conditions);
+
+            $page_str = $this->_build_page_str($page_parameters);
+            $page_payload = $this->_build_page_payload($page_parameters);
+            $order_str = $this->_build_order_str($page_parameters);
+
+            if(self::$is_encryption_enabled)
+                $column = $this->_build_decrypted_column_str($column);
+
+            $rows = Database::query(
+                "SELECT $column FROM $table $where_str $order_str $page_str",
+                array_merge($where_payload, $page_payload)
+            );
+
+            $rows = array_map(fn($r) => $r[$column], $rows);
+
+            return $this->_output($rows);
+        }
+
         /**
          * Given an ID, retrieves the associated entry within the service's table
          *

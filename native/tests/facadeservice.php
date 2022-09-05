@@ -630,4 +630,37 @@
                 $parents[0]->get('pk')
             );
         }
+
+        public function testPluck() : void
+        {
+            $this->assertEquals(
+                [ 'Joe' , 'Jane' , 'Paul' ],
+                TestsParents::pluck( 'name' )
+            );
+
+            $this->assertEquals(
+                [ 'Joe' , 'Jane' , 'Paul' ],
+                TestsParents::pluck( 'name' , [] )
+            );
+
+            $this->assertEquals(
+                [ 'Joe' , 'Jane' , 'Paul' ],
+                TestsParents::pluck( 'name' , [] , [] )
+            );
+
+            $this->assertEquals(
+                [ 'Joe' ],
+                TestsParents::pluck( 'name' , [] , [ 'per_page' => 1 , 'page' => 1 ] )
+            );
+
+            $this->assertEquals(
+                [ 'Paul' ],
+                TestsParents::pluck( 'name' , [] , [ 'per_page' => 2 , 'page' => 2 ] )
+            );
+
+            $this->assertEquals(
+                [ 'Paul' ],
+                TestsParents::pluck( 'name' , [ 'pk' => 3 ] , [ ] )
+            );
+        }
     }

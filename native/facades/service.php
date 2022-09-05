@@ -95,5 +95,9 @@ use native\libs\Service as BaseService;
         {
             self::call_base_service('populate_many', $objects, $field, $conditions, $page_parameters);
         }
+        public static function pluck(string $column, array $conditions = [], array $page_parameters = []) : array
+        {
+            return self::call_base_service('pluck', $column, $conditions, $page_parameters);
+        }
 
     }
