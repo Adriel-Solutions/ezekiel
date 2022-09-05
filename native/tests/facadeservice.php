@@ -633,29 +633,29 @@
 
         public function testPluck() : void
         {
-            $this->assertEquals(
+            $this->assertEqualsCanonicalizing(
                 [ 'Joe' , 'Jane' , 'Paul' ],
                 TestsParents::pluck( 'name' )
             );
 
-            $this->assertEquals(
+            $this->assertEqualsCanonicalizing(
                 [ 'Joe' , 'Jane' , 'Paul' ],
                 TestsParents::pluck( 'name' , [] )
             );
 
-            $this->assertEquals(
+            $this->assertEqualsCanonicalizing(
                 [ 'Joe' , 'Jane' , 'Paul' ],
                 TestsParents::pluck( 'name' , [] , [] )
             );
 
             $this->assertEquals(
                 [ 'Joe' ],
-                TestsParents::pluck( 'name' , [] , [ 'per_page' => 1 , 'page' => 1 ] )
+                TestsParents::pluck( 'name' , [] , [ 'per_page' => 1 , 'page' => 2 , 'order' => [ 'name' => 'DESC' ]] )
             );
 
             $this->assertEquals(
                 [ 'Paul' ],
-                TestsParents::pluck( 'name' , [] , [ 'per_page' => 2 , 'page' => 2 ] )
+                TestsParents::pluck( 'name' , [] , [ 'per_page' => 2 , 'page' => 2 , 'order' => [ 'name' => 'ASC' ] ] )
             );
 
             $this->assertEquals(

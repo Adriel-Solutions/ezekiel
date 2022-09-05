@@ -12,9 +12,6 @@ if [[ -z $1 || $1 != "--no-random" ]]; then
     for container in ${containers}; do
         # container_name: "ezekiel-xxx-db"
         sed -i '' -E "s/\".+-$container\"/\"ezekiel-$random_prefix-$container\"/g" docker-compose.dev.yml
-
-        # depends_on:\n- xxx-db
-        # sed -i '' -E "s/- .+-$container/- $random_prefix-$container/g" docker-compose.dev.yml
     done
 fi
 

@@ -6,7 +6,7 @@ networks:
 services:
   ezekiel-web:
     image: 'nginx:stable-alpine'
-    container_name: "ezekiel-web"
+    container_name: "ezekiel-NTI4MAo-web"
     restart: always
     depends_on:
       - ezekiel-db
@@ -22,7 +22,7 @@ services:
 
   ezekiel-db:
     image: postgres:12.1
-    container_name: "ezekiel-db"
+    container_name: "ezekiel-NTI4MAo-db"
     restart: always
     environment:
       - POSTGRES_DB=postgres
@@ -37,7 +37,7 @@ services:
 
   ezekiel-fpm:
     image: adriel/boilerplate-php-fpm
-    container_name: "ezekiel-fpm"
+    container_name: "ezekiel-NTI4MAo-fpm"
     hostname: nginx-fpm-host
     volumes:
       - .:/app

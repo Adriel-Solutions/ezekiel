@@ -599,7 +599,7 @@
                 $column = $this->_build_decrypted_column_str($column);
 
             $rows = Database::query(
-                "SELECT $column FROM $table $where_str $order_str $page_str",
+                "SELECT DISTINCT $column FROM $table $where_str $order_str $page_str",
                 array_merge($where_payload, $page_payload)
             );
 

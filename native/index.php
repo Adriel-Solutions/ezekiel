@@ -43,7 +43,7 @@
     }
     else {
         error_reporting(E_ALL);
-        ini_set('ignore_repeated_errors', 1);
+        ini_set('ignore_repeated_errors', TRUE);
         ini_set('display_errors', FALSE);
         ini_set('log_errors', TRUE);
         ini_set('error_log', '/var/log/php-fpm/error.log');
