@@ -2,6 +2,8 @@
     namespace native\libs;
 
     use Exception;
+    use native\collections\Records;
+    use native\facades\Service as FacadeService;
 
     /**
      * This internal library is a base class for all the Service classes across
@@ -39,17 +41,23 @@
         protected string $table_write;
 
         // Whether to return plain arrays, or Record objects
-        protected bool $is_record_asked;
+        private bool $is_record_asked;
 
         // Whether encryption is enabled, and hence, wheter to use pgp_sym_encrypt/decrypt everywhere
         private static bool $is_encryption_enabled;
         private static string $encryption_key;
 
-        public function __construct() {
+        public function __construct(FacadeService $instance = null) {
             // The SQL table associated with the current service
-            $this->table = isset($this->table) 
-                           ? $this->table 
-                           : decamelize(without_namespace(get_called_class()));
+            if(!isset($instance))
+                $this->table = isset($this->table) 
+                               ? $this->table 
+                               : decamelize(without_namespace(get_called_class()));
+            else
+                $this->table = null !== $instance->get_table()
+                               ? $instance->get_table() 
+                               : decamelize(without_namespace(get_class($instance)));
+
 
             // The SQL relations associated with the current SQL table
             /* $this->relations = [ */
@@ -83,9 +91,15 @@
             /*     ] */
             /* ]; */
 
-            $this->relations = isset($this->relations) ? $this->relations : [];
+            if(!isset($instance))
+                $this->relations = isset($this->relations) ? $this->relations : [];
+            else
+                $this->relations = null !== $instance->get_relations() ? $instance->get_relations() : [];
 
-            $this->schema = isset($this->schema) ? $this->schema : [];
+            if(!isset($instance))
+                $this->schema = isset($this->schema) ? $this->schema : [];
+            else
+                $this->schema = null !== $instance->get_schema() ? $instance->get_schema() : [];
 
             self::$is_encryption_enabled = Options::get('ENCRYPTION_ENABLED');
             self::$encryption_key = Options::get('ENCRYPTION_KEY');
@@ -513,7 +527,7 @@
             return $this->_build_decrypted_table_columns_str($table, $prefix);
         }
 
-        protected function _output(array $result) : array|Record {
+        protected function _output(array $result) : array|Record|Records {
             // One row -> Array
             if(!$this->is_record_asked)
                 return $result;
@@ -576,7 +590,7 @@
          * @param {string} $id The value to look for in the "pk" column of the service's table
          * @return {array} The found entry, as an associative array
          */
-        public function get(int|string $id) : array|Record 
+        public function get(int|string $id) : array|Record
         {
             $table = $this->_determine_table_for('read');
 
@@ -592,7 +606,7 @@
             return $this->_output($rows[0]);
         }
 
-        public function get_many(array $page_parameters) : array|Record 
+        public function get_many(array $page_parameters) : array|Records
         {
             $table = $this->_determine_table_for('read');
 
@@ -616,7 +630,7 @@
          *
          * @return {array<array>} The list of records coming stored in the service's table
          */
-        public function get_all($page_parameters = []) : array|Record 
+        public function get_all($page_parameters = []) : array|Records
         {
             $table = $this->_determine_table_for('read');
 
@@ -689,7 +703,7 @@
          *
          * @return {array<array>} The paginated list of matching rows that were found and retrieved
          */
-        public function find_many(array $conditions, array $page_parameters = []) : array|Record 
+        public function find_many(array $conditions, array $page_parameters = []) : array|Records
         {
             $table = $this->_determine_table_for('read');
 
@@ -739,7 +753,7 @@
          * @param {array<array>} $conditions See _build_where_str
          * @return {array<array>} The list of found records, an empty array if no match
          */
-        public function find_all(array $conditions, array $page_parameters = []) : array|Record 
+        public function find_all(array $conditions, array $page_parameters = []) : array|Records
         {
             $table = $this->_determine_table_for('read');
 
@@ -861,7 +875,7 @@
         }
 
         // Update one or many using conditions
-        public function find_and_update(array $conditions, array $payload) : array|Record 
+        public function find_and_update(array $conditions, array $payload) : array|Records
         {
             $table = $this->_determine_table_for('write');
 
