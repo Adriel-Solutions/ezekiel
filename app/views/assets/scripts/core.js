@@ -1,16 +1,16 @@
 /**
  * Runs before Alpine initializiation
- * -> Creates an `adriel` object attached to the `window` superglobal
- * -> Creates a method `adriel.makeForm` that helps working with forms and async within Alpine
+ * -> Creates an `ezekiel` object attached to the `window` superglobal
+ * -> Creates a method `ezekiel.makeForm` that helps working with forms and async within Alpine
  *
  * -> Creates an `api` object attached to the `window` superglobal
  * -> Creates a method `api.fetch` that works like native `fetch` with default settings
  *
  */
 (() => {
-  window.adriel = {};
+  window.ezekiel = {};
 
-  window.adriel.makeForm = (alpineForm) => {
+  window.ezekiel.makeForm = (alpineForm) => {
     const defaultForm = {
       /**
        * Set of rules to validate
