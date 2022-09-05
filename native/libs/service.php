@@ -32,10 +32,6 @@
         // The validation rules for each column in the service's SQL table
         protected array $schema;
 
-        // Whether encryption is enabled, and hence, wheter to use pgp_sym_encrypt/decrypt everywhere
-        protected bool $is_encryption_enabled;
-        protected string $encryption_key;
-
         // The SQL tables associated with the service
         // Proves useful when one service has a different table for
         // writing and reading
@@ -45,48 +41,52 @@
         // Whether to return plain arrays, or Record objects
         protected bool $is_record_asked;
 
-        // Every Service should overwrite the default constructor to define
-        // their own SQL affinity (associated table + relations)
+        // Whether encryption is enabled, and hence, wheter to use pgp_sym_encrypt/decrypt everywhere
+        private static bool $is_encryption_enabled;
+        private static string $encryption_key;
+
         public function __construct() {
             // The SQL table associated with the current service
-            $this->table = 'CHANGE ME';
+            $this->table = isset($this->table) ? $this->table : get_called_class();
 
             // The SQL relations associated with the current SQL table
-            $this->relations = [
-                'relation_name' => [
+            /* $this->relations = [ */
+            /*     'relation_name' => [ */
 
-                    // The local column reference to the foreign table
-                    // Unused when the type of relation is MANY-TO-MANY
-                    'column' => 'fk_column',
+            /*         // The local column reference to the foreign table */
+            /*         // Unused when the type of relation is MANY-TO-MANY */
+            /*         'column' => 'fk_column', */
 
-                    // The foreign table associated with ours
-                    'table' => 'CHANGE ME',
+            /*         // The foreign table associated with ours */
+            /*         'table' => 'CHANGE ME', */
 
-                    // The table to use for read operations if working with a view
-                    'table_read' => 'CHANGE ME',
+            /*         // The table to use for read operations if working with a view */
+            /*         'table_read' => 'CHANGE ME', */
 
-                    // The table to use for write operations if working with a view
-                    'table_write' => 'CHANGE ME',
+            /*         // The table to use for write operations if working with a view */
+            /*         'table_write' => 'CHANGE ME', */
 
-                    // The type of relation with the foreign table
-                    'type' => 'ONE-TO-ONE|MANY-TO-ONEONE-TO-MANY||MANY-TO-MANY',
+            /*         // The type of relation with the foreign table */
+            /*         'type' => 'ONE-TO-ONE|MANY-TO-ONEONE-TO-MANY||MANY-TO-MANY', */
 
-                    // The table of associations, when the type is MANY-TO-MANY
-                    // In other words, the intermediate table in a N-N relation
-                    'dictionary' => 'table de correspondance',
+            /*         // The table of associations, when the type is MANY-TO-MANY */
+            /*         // In other words, the intermediate table in a N-N relation */
+            /*         'dictionary' => 'table de correspondance', */
 
-                    // In the dictionary, the name of the column referencing our primary key
-                    'local_column' => 'A',
+            /*         // In the dictionary, the name of the column referencing our primary key */
+            /*         'local_column' => 'A', */
 
-                    // In the dictionary, the name of the column referencing the foreign primary key
-                    'foreign_column' => 'B',
-                ]
-            ];
+            /*         // In the dictionary, the name of the column referencing the foreign primary key */
+            /*         'foreign_column' => 'B', */
+            /*     ] */
+            /* ]; */
 
-            $this->schema = [];
+            $this->relations = isset($this->relations) ? $this->relations : [];
 
-            $this->is_encryption_enabled = Options::get('ENCRYPTION_ENABLED');
-            $this->encryption_key = Options::get('ENCRYPTION_KEY');
+            $this->schema = isset($this->schema) ? $this->schema : [];
+
+            self::$is_encryption_enabled = Options::get('ENCRYPTION_ENABLED');
+            self::$encryption_key = Options::get('ENCRYPTION_KEY');
 
             $this->is_record_asked = false;
 
@@ -105,7 +105,7 @@
         public function get_schema() : array { return $this->schema; }
         public function set_schema(array $schema) : void { $this->schema = $schema; }
         public function set_relation($name, $relation) : void { $this->relations[$name] = $relation; }
-        public function as_records() : Service { $this->is_record_asked = true; return $this; }
+        public function as_records() : static { $this->is_record_asked = true; return $this; }
 
         /**
          * Turn an array of $column => $value WHERE clauses
@@ -207,7 +207,7 @@
             $base = ' WHERE  ';
             $conditions_strs = [];
 
-            $has_to_be_decrypted = $this->is_encryption_enabled === true ? true : false;
+            $has_to_be_decrypted = self::$is_encryption_enabled === true ? true : false;
 
             // If conditions are not expressed as an array of arrays, normalize them
             // [ $key => $value ] becomes the format described in the documentation
@@ -218,7 +218,7 @@
             foreach($conditions as $c) {
                 // Column is an SQL expression, example : LENGTH(col)
                 if(str_starts_with($c['column'], '[')) {
-                    if($this->is_encryption_enabled) 
+                    if(self::$is_encryption_enabled)
                         throw new Exception('SQL expressions are not supported when encryption is enabled');
                     else
                         $c['column'] = str_replace([ '[' , ']' ], '', $c['column']);
@@ -228,7 +228,7 @@
                     $c_str = $this->_build_decrypted_column_str($c['column']);
                 else
                     $c_str = $c['column'];
-                
+
                 $column = empty($c['alias']) ? $c['column'] : $c['alias'];
 
                 $c_str .= ' ';
@@ -313,7 +313,7 @@
                 }
 
                 // Intentional SQL cast to text
-                if ( $this->is_encryption_enabled )
+                if ( self::$is_encryption_enabled )
                     // Value = [SQL_STUFF]
                     if ( str_starts_with($v, '[') )
                         throw new Exception('SQL expressions are not supported when encryption is enabled');
@@ -331,14 +331,14 @@
         }
 
         protected function _build_page_str(array $params = []) : string {
-            if(empty($params['per_page']) || empty($params['page'])) 
+            if(empty($params['per_page']) || empty($params['page']))
                 return "";
 
             return "LIMIT :per_page OFFSET :page_shift";
         }
 
         protected function _build_page_payload(array $params) : array {
-            if(empty($params['per_page']) || empty($params['page'])) 
+            if(empty($params['per_page']) || empty($params['page']))
                 return [];
 
             $per_page = $params['per_page'];
@@ -439,27 +439,27 @@
         }
 
         protected function _build_encrypted_column_str(string $column) : string {
-            $key = $this->encryption_key;
+            $key = self::$encryption_key;
             return "pgp_sym_encrypt($column, '$key')";
         }
 
         protected function _build_encrypted_placeholder_str(string $placeholder) : string {
-            $key = $this->encryption_key;
+            $key = self::$encryption_key;
             return "pgp_sym_encrypt(:$placeholder, '$key')";
         }
 
         protected function _build_decrypted_column_str(string $column) : string {
-            $key = $this->encryption_key;
+            $key = self::$encryption_key;
             return "pgp_sym_decrypt($column, '$key')";
         }
 
         protected function _build_decrypted_placeholder_str(string $placeholder) : string {
-            $key = $this->encryption_key;
+            $key = self::$encryption_key;
             return "pgp_sym_decrypt(:$placeholder, '$key')";
         }
 
         protected function _get_primary_key() : string {
-            if ( $this->is_encryption_enabled )
+            if ( self::$is_encryption_enabled )
                 return $this->_build_decrypted_column_str('pk');
             return 'pk';
         }
@@ -473,7 +473,7 @@
          * @return {string} A comma-separated list of columns wrapped inside a pgp_sym_decrypt()
          */
         protected function _build_decrypted_table_columns_str(string $table = "", string $prefix = "") : string {
-            $encryption_key = $this->encryption_key;
+            $encryption_key = self::$encryption_key;
 
             if ( empty($table) )
                 $table = $this->_determine_table_for('read');
@@ -490,8 +490,8 @@
                 ', ',
                 array_map(
                     function($cn) use ($encryption_key, $prefix) {
-                        
-                        return empty($prefix) 
+
+                        return empty($prefix)
                             ? "pgp_sym_decrypt($cn, '$encryption_key') AS $cn"
                             : "pgp_sym_decrypt($prefix.$cn, '$encryption_key') AS $cn";
                     },
@@ -503,14 +503,14 @@
         }
 
         protected function _build_returned_columns_str(string $table = "", string $prefix = "") : string {
-            if ( !$this->is_encryption_enabled )
+            if ( !self::$is_encryption_enabled )
                 return '*';
             return $this->_build_decrypted_table_columns_str($table, $prefix);
         }
 
         protected function _output(array $result) : array|Record {
             // One row -> Array
-            if(!$this->is_record_asked) 
+            if(!$this->is_record_asked)
                 return $result;
 
             $this->is_record_asked = false;
@@ -533,7 +533,7 @@
             $table = $this->_determine_table_for('read');
 
             $column = 'pk';
-            if ( $this->is_encryption_enabled )
+            if ( self::$is_encryption_enabled )
                 $column = $this->_build_decrypted_column_str($column);
 
             $rows = Database::query(
@@ -766,7 +766,7 @@
                 array_map(
                     function ($field) {
                         // Database encryption enabled
-                        if ( $this->is_encryption_enabled )
+                        if ( self::$is_encryption_enabled )
                             return $this->_build_encrypted_placeholder_str($field);
                         // Normal query
                         else
@@ -776,7 +776,7 @@
                 )
             );
 
-            if ( $this->is_encryption_enabled ) {
+            if ( self::$is_encryption_enabled ) {
                 $parenthesis_str .= ' , pk' ;
                 $values_str .= ' , ' . $this->_build_encrypted_placeholder_str('pk');
                 $payload = array_merge($payload , [ 'pk' => UUID::v5() ]);
@@ -1013,13 +1013,13 @@
 
                     $returned_columns = $this->_build_returned_columns_str($foreign_table, 'f');
 
-                    $encryption_key = $this->encryption_key;
+                    $encryption_key = self::$encryption_key;
                     $rows = Database::query(
                         "SELECT $returned_columns
-                         FROM $dictionary_table AS d" 
+                         FROM $dictionary_table AS d"
                         .
                         (
-                            $this->is_encryption_enabled
+                            self::$is_encryption_enabled
                             ? " INNER JOIN $foreign_table AS f ON pgp_sym_decrypt(f.pk, '$encryption_key') = pgp_sym_decrypt(d.$foreign_column, '$encryption_key')"
                             : " INNER JOIN $foreign_table AS f ON f.pk = d.$foreign_column"
                         )
