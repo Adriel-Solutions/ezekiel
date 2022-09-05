@@ -11,11 +11,24 @@
     use native\libs\Thirdparty;
     use native\libs\Constants;
 
-    function vd(...$x) {
+    function vd(mixed ...$x) : void
+    {
         echo '<pre>';
         var_dump($x);
         echo '</pre>';
     }
+
+    function decamelize(string $str) : string
+    {
+        return strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $str));
+    }
+
+    function without_namespace(string $str) : string
+    {
+        $tmp = explode('\\', $str);
+        return end($tmp);
+    }
+
     
     /**
      * Practical aliases
