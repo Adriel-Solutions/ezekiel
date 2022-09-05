@@ -47,7 +47,9 @@
 
         public function __construct() {
             // The SQL table associated with the current service
-            $this->table = isset($this->table) ? $this->table : get_called_class();
+            $this->table = isset($this->table) 
+                           ? $this->table 
+                           : decamelize(without_namespace(get_called_class()));
 
             // The SQL relations associated with the current SQL table
             /* $this->relations = [ */
@@ -532,15 +534,14 @@
          * @param {string} $id The value to look for in the "pk" column of the service's table
          * @return {boolean} true if found, false otherwise
          */
-        public function exists(int|string $id) : bool {
+        public function exists(int|string $id) : bool 
+        {
             $table = $this->_determine_table_for('read');
 
-            $column = 'pk';
-            if ( self::$is_encryption_enabled )
-                $column = $this->_build_decrypted_column_str($column);
+            $primary_key = $this->_get_primary_key();
 
             $rows = Database::query(
-                "SELECT 1 FROM $table WHERE $column = :id",
+                "SELECT 1 FROM $table WHERE $primary_key = :id",
                 [ 'id' => $id ]
             );
 
@@ -553,7 +554,8 @@
          * @param {array<array>} $conditions See _build_where_str
          * @return {boolean} true if found, false otherwise
          */
-        public function exists_one(array $conditions) : bool {
+        public function exists_one(array $conditions) : bool 
+        {
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions);
@@ -574,7 +576,8 @@
          * @param {string} $id The value to look for in the "pk" column of the service's table
          * @return {array} The found entry, as an associative array
          */
-        public function get(int|string $id) : array|Record {
+        public function get(int|string $id) : array|Record 
+        {
             $table = $this->_determine_table_for('read');
 
             $primary_key = $this->_get_primary_key();
@@ -589,7 +592,8 @@
             return $this->_output($rows[0]);
         }
 
-        public function get_many(array $page_parameters) : array|Record {
+        public function get_many(array $page_parameters) : array|Record 
+        {
             $table = $this->_determine_table_for('read');
 
             $page_str = $this->_build_page_str($page_parameters);
@@ -612,7 +616,8 @@
          *
          * @return {array<array>} The list of records coming stored in the service's table
          */
-        public function get_all($page_parameters = []) : array|Record {
+        public function get_all($page_parameters = []) : array|Record 
+        {
             $table = $this->_determine_table_for('read');
 
             $page_str = $this->_build_page_str($page_parameters);
@@ -635,7 +640,8 @@
          *
          * @return {int} The number of records stored in the service's table
          */
-        public function get_count() : int {
+        public function get_count() : int 
+        {
             $table = $this->_determine_table_for('read');
 
             $rows = Database::query(
@@ -652,7 +658,8 @@
          *
          * @return {array} The first matched record
          */
-        public function find_one(array $conditions, bool $is_strict = true) : array|Record {
+        public function find_one(array $conditions, bool $is_strict = true) : array|Record 
+        {
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $is_strict);
@@ -682,7 +689,8 @@
          *
          * @return {array<array>} The paginated list of matching rows that were found and retrieved
          */
-        public function find_many(array $conditions, array $page_parameters = []) : array|Record {
+        public function find_many(array $conditions, array $page_parameters = []) : array|Record 
+        {
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $page_parameters['strict_search'] ?? true);
@@ -710,7 +718,8 @@
          * @param {array<array>} $conditions See _build_where_str
          * @return {int} The number of matched rows
          */
-        public function find_count(array $conditions, bool $is_strict = true) : int {
+        public function find_count(array $conditions, bool $is_strict = true) : int 
+        {
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $is_strict);
@@ -730,7 +739,8 @@
          * @param {array<array>} $conditions See _build_where_str
          * @return {array<array>} The list of found records, an empty array if no match
          */
-        public function find_all(array $conditions, array $page_parameters = []) : array|Record {
+        public function find_all(array $conditions, array $page_parameters = []) : array|Record 
+        {
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $page_parameters['strict_search'] ?? true);
@@ -757,7 +767,8 @@
          * @param {array} $payload The list of key-values defining the record
          * @return {array} The inserted record, post-insertion
          */
-        public function create(array $payload) : array|Record {
+        public function create(array $payload) : array|Record 
+        {
             $table = $this->_determine_table_for('write');
 
             $payload = $this->_normalize_payload($payload);
@@ -806,7 +817,8 @@
          * @param {array} $payload The new key-values to set for the identified entry
          * @return {array} The updated entry, as an associative array
          */
-        public function update($id, $payload) {
+        public function update($id, $payload) 
+        {
             $table = $this->_determine_table_for('write');
 
             $primary_key = $this->_get_primary_key();
@@ -836,7 +848,8 @@
          *
          * @param {string} $id The value to look for in the "pk" column of the service's table
          */
-        public function delete(int|string $id) : void {
+        public function delete(int|string $id) : void 
+        {
             $table = $this->_determine_table_for('write');
 
             $primary_key = $this->_get_primary_key();
@@ -848,7 +861,8 @@
         }
 
         // Update one or many using conditions
-        public function find_and_update(array $conditions, array $payload) : array|Record {
+        public function find_and_update(array $conditions, array $payload) : array|Record 
+        {
             $table = $this->_determine_table_for('write');
 
             $where_str = $this->_build_where_str($conditions);
@@ -875,7 +889,8 @@
         }
 
         // Delete one or many using conditions
-        public function find_and_delete(array $conditions) : void {
+        public function find_and_delete(array $conditions) : void 
+        {
             $table = $this->_determine_table_for('write');
 
             $where_str = $this->_build_where_str($conditions);
@@ -899,7 +914,8 @@
          * @param {array} $page_parameters Only applicable in MANY-TO-ONE/ONE-TO-MANY to apply conditions on OR / AND base
          * @param {array} $conditions See _build_where_str
          */
-        public function populate(&$object, string $field, array $conditions = [], array $page_parameters = []) : void {
+        public function populate(&$object, string $field, array $conditions = [], array $page_parameters = []) : void 
+        {
             $relation = $this->relations[$field];
 
             $foreign_table = $relation['table'];
@@ -1052,7 +1068,8 @@
          * @param {string} $field The name of the relation to populate
          * @param {array} $conditions See _build_where_str
          */
-        public function populate_many(&$objects, string $field, array $conditions = [], array $page_parameters = []) : void {
+        public function populate_many(&$objects, string $field, array $conditions = [], array $page_parameters = []) : void 
+        {
             foreach($objects as &$object)
                 $this->populate($object, $field, $conditions, $page_parameters);
         }
