@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a74d57c47edbc06bb56f9eee69a6c422",
+    "content-hash": "60c93b6234e3d755dd8a4a7cf8bf769b",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.235.1",
+            "version": "3.235.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "2025db05c7dd22ae414857dadd49207f64c2fc74"
+                "reference": "3b002b92369dbcb8d86f32546cb324eabcd19a4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2025db05c7dd22ae414857dadd49207f64c2fc74",
-                "reference": "2025db05c7dd22ae414857dadd49207f64c2fc74",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3b002b92369dbcb8d86f32546cb324eabcd19a4e",
+                "reference": "3b002b92369dbcb8d86f32546cb324eabcd19a4e",
                 "shasum": ""
             },
             "require": {
@@ -144,9 +144,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.235.1"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.235.5"
             },
-            "time": "2022-09-02T18:18:19+00:00"
+            "time": "2022-09-09T18:19:38+00:00"
         },
         {
             "name": "filp/whoops",
@@ -1104,6 +1104,42 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "adrielsolutions/ezekiel-cli",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Adriel-Solutions/ezekiel-cli.git",
+                "reference": "2e81c1db26167dde3a6c0e9adefcb9314b295dd6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Adriel-Solutions/ezekiel-cli/zipball/2e81c1db26167dde3a6c0e9adefcb9314b295dd6",
+                "reference": "2e81c1db26167dde3a6c0e9adefcb9314b295dd6",
+                "shasum": ""
+            },
+            "default-branch": true,
+            "bin": [
+                "bin/ezekiel"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Adriel Solutions",
+                    "email": "it@adriel.solutions"
+                }
+            ],
+            "description": "The CLI for the Ezekiel PHP framework",
+            "support": {
+                "issues": "https://github.com/Adriel-Solutions/ezekiel-cli/issues",
+                "source": "https://github.com/Adriel-Solutions/ezekiel-cli/tree/master"
+            },
+            "time": "2022-09-10T15:53:11+00:00"
+        },
         {
             "name": "amphp/amp",
             "version": "dev-master",
@@ -2292,12 +2328,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "c7dde1361feee0ecd796067096dc5bdde411fbef"
+                "reference": "50472880736e7496b35a17d588807600ca45a2b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/c7dde1361feee0ecd796067096dc5bdde411fbef",
-                "reference": "c7dde1361feee0ecd796067096dc5bdde411fbef",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/50472880736e7496b35a17d588807600ca45a2b5",
+                "reference": "50472880736e7496b35a17d588807600ca45a2b5",
                 "shasum": ""
             },
             "require": {
@@ -2361,7 +2397,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-09-04T05:57:33+00:00"
+            "time": "2022-09-10T05:54:34+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -2610,12 +2646,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "f7cae484eea6097891dfc175db3398c7fd1f940d"
+                "reference": "5734efdf3accebb569198c24eb19008d377cf326"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/f7cae484eea6097891dfc175db3398c7fd1f940d",
-                "reference": "f7cae484eea6097891dfc175db3398c7fd1f940d",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/5734efdf3accebb569198c24eb19008d377cf326",
+                "reference": "5734efdf3accebb569198c24eb19008d377cf326",
                 "shasum": ""
             },
             "require": {
@@ -2698,9 +2734,13 @@
                 {
                     "url": "https://github.com/sebastianbergmann",
                     "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/phpunit/phpunit",
+                    "type": "tidelift"
                 }
             ],
-            "time": "2022-09-03T16:01:27+00:00"
+            "time": "2022-09-10T07:41:58+00:00"
         },
         {
             "name": "psr/container",
@@ -3613,16 +3653,16 @@
         },
         {
             "name": "sebastian/type",
-            "version": "3.1.x-dev",
+            "version": "3.2.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/type.git",
-                "reference": "a0f3e755c775fdc960cd5552e046a860c82dd9f9"
+                "reference": "a08183b7ab666e586d8e40d0b939edb41f1c348a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/a0f3e755c775fdc960cd5552e046a860c82dd9f9",
-                "reference": "a0f3e755c775fdc960cd5552e046a860c82dd9f9",
+                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/a08183b7ab666e586d8e40d0b939edb41f1c348a",
+                "reference": "a08183b7ab666e586d8e40d0b939edb41f1c348a",
                 "shasum": ""
             },
             "require": {
@@ -3634,7 +3674,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.1-dev"
+                    "dev-master": "3.2-dev"
                 }
             },
             "autoload": {
@@ -3657,7 +3697,7 @@
             "homepage": "https://github.com/sebastianbergmann/type",
             "support": {
                 "issues": "https://github.com/sebastianbergmann/type/issues",
-                "source": "https://github.com/sebastianbergmann/type/tree/3.1"
+                "source": "https://github.com/sebastianbergmann/type/tree/3.2"
             },
             "funding": [
                 {
@@ -3665,7 +3705,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-09-04T06:24:39+00:00"
+            "time": "2022-09-09T08:54:41+00:00"
         },
         {
             "name": "sebastian/version",
@@ -4594,7 +4634,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "vimeo/psalm": 20
+        "vimeo/psalm": 20,
+        "adrielsolutions/ezekiel-cli": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -10,9 +10,6 @@
       "email": "it@adriel.solutions"
     }
   ],
-  "require": {
-    "php": ">=8.0.0"
-  },
   "minimum-stability": "dev",
   "config": {
     "vendor-dir": "./dependencies",
@@ -25,7 +22,8 @@
   },
   "require-dev": {
     "vimeo/psalm": "5.x-dev",
-    "phpunit/phpunit": "^9"
+    "phpunit/phpunit": "^9",
+    "adrielsolutions/ezekiel-cli": "dev-master"
   },
   "scripts": {
     "post-root-package-install": [
