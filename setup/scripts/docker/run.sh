@@ -22,4 +22,3 @@ docker-compose -f docker-compose.dev.yml up -d
 ./setup/scripts/docker/install-dependencies.sh
 ./setup/scripts/docker/reset-db.sh
 ./setup/scripts/docker/run-db-migrations.sh
-
