@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60c93b6234e3d755dd8a4a7cf8bf769b",
+    "content-hash": "c244702b8ba2aca7a1d61044fbb3f8db",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -2647,12 +2647,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "ef3f40ba4709aa9c6034e4797a603b87f3022205"
+                "reference": "7768084f503a5eaef2ca32dec9e6f961191d7c2e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ef3f40ba4709aa9c6034e4797a603b87f3022205",
-                "reference": "ef3f40ba4709aa9c6034e4797a603b87f3022205",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/7768084f503a5eaef2ca32dec9e6f961191d7c2e",
+                "reference": "7768084f503a5eaef2ca32dec9e6f961191d7c2e",
                 "shasum": ""
             },
             "require": {
@@ -2741,7 +2741,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-09-11T08:56:38+00:00"
+            "time": "2022-09-12T11:09:56+00:00"
         },
         {
             "name": "psr/container",
@@ -3658,12 +3658,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/type.git",
-                "reference": "e53e8f0c4fd4a1eb107a15a3309dea78fe6ac65e"
+                "reference": "9bc9083a543bc3e1c6b54d42d63a3b448c754ce7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/e53e8f0c4fd4a1eb107a15a3309dea78fe6ac65e",
-                "reference": "e53e8f0c4fd4a1eb107a15a3309dea78fe6ac65e",
+                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/9bc9083a543bc3e1c6b54d42d63a3b448c754ce7",
+                "reference": "9bc9083a543bc3e1c6b54d42d63a3b448c754ce7",
                 "shasum": ""
             },
             "require": {
@@ -3706,7 +3706,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-09-12T06:42:14+00:00"
+            "time": "2022-09-12T09:32:09+00:00"
         },
         {
             "name": "sebastian/version",
@@ -4648,5 +4648,8 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
+    "platform-overrides": {
+        "php": "8.1"
+    },
     "plugin-api-version": "2.3.0"
 }
