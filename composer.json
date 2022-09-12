@@ -27,7 +27,7 @@
   },
   "scripts": {
     "post-root-package-install": [
-      "./setup/scripts/setup.sh"
+      "./setup/scripts/docker/setup.sh"
     ]
   }
 }

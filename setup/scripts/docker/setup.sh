@@ -1,4 +1,3 @@
-# Shutdown the containers
 docker-compose -f docker-compose.dev.yml down
 
 if [[ -z $1 || $1 != "--no-random" ]]; then
@@ -12,14 +11,14 @@ if [[ -z $1 || $1 != "--no-random" ]]; then
     for container in ${containers}; do
         # container_name: "ezekiel-xxx-db"
         sed -i '' -E "s/\".+-$container\"/\"ezekiel-$random_prefix-$container\"/g" docker-compose.dev.yml
+
+        # depends_on:\n- xxx-db
+        # sed -i '' -E "s/- .+-$container/- $random_prefix-$container/g" docker-compose.dev.yml
     done
 fi
 
-# Restart everything brand new
 docker-compose -f docker-compose.dev.yml up -d
-
-# Set up database and dependencies
-./setup/scripts/install-dependencies.sh
-./setup/scripts/reset-db.sh
-./setup/scripts/run-db-migrations.sh
-
+./setup/scripts/docker/install-dependencies.sh
+./setup/scripts/docker/create-new-env.sh
+./setup/scripts/docker/reset-db.sh
+./setup/scripts/docker/run-db-migrations.sh
