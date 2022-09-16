@@ -103,6 +103,21 @@
         - uploads
         - logs
 
+    - name: Recreate logs structure
+      file:
+        path: "/var/www/html/app/shared/logs/{{ item }}"
+        state: directory
+      with_items:
+        - nginx
+        - php
+        - app
+
+    - name: Set proper permissions for PHP logs
+      file:
+        path: "/var/www/html/app/shared/logs/php"
+        mode: "757"
+        state: directory
+
     - name: Install dependencies
       command: composer install
       args:
@@ -128,3 +143,4 @@
       command: ./ezekiel run:migrations
       args:
         chdir: /var/www/html/app/current
+

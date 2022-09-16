@@ -31,6 +31,10 @@ server {
     # Where the code is located
     root {{ root }};
 
+    # Where the logs will be located
+    access_log {{ root }}/logs/nginx/access.log;
+    error_log {{ root }}/logs/nginx/error.log;
+
     # Set relative redirects to prevent port / host mismatch
     port_in_redirect off;
     absolute_redirect off;
