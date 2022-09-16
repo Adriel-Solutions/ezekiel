@@ -1,0 +1,95 @@
+{% set root = '/var/www/html/app/current' %}
+
+server {
+    # Port
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+
+    # Virtual host
+    server_name www.{{ domain }} {{ domain }};
+
+    # SSL
+    ssl_certificate      /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key  /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+
+  	# SSL - Improve HTTPS performance with session resumption
+  	ssl_session_cache shared:SSL:10m;
+  	ssl_session_timeout 10m;
+
+    # SSL - Enable server-side protection against BEAST attacks
+  	ssl_protocols TLSv1.2;
+	ssl_prefer_server_ciphers on;
+	ssl_ciphers "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384";
+
+  	# SSL - Enable OCSP stapling
+  	ssl_stapling on;
+  	ssl_stapling_verify on;
+  	ssl_trusted_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+  	resolver 1.1.1.1 1.0.0.1 [2606:4700:4700::1111] [2606:4700:4700::1001] valid=300s;
+  	resolver_timeout 5s;
+
+    # Where the code is located
+    root {{ root }};
+
+    # Set relative redirects to prevent port / host mismatch
+    port_in_redirect off;
+    absolute_redirect off;
+
+    # Compression
+    gzip            on;
+    gzip_vary       on;
+    gzip_proxied    any;
+    gzip_comp_level 6;
+    gzip_types      text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
+
+    # Hide server information
+    server_tokens off;
+
+    # Default routing
+    # -> /a : API Routes
+    # -> /f : Front Routes
+    # -> /w : Webhooks Routes
+    # All handled by PHP
+    location ~ ^/(a|f|w)/ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/native/bin/app.php;
+        fastcgi_param PATH_INFO       $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_pass  unix:/run/php/php{{ php_version }}-fpm.sock; # <- PHP-FPM Host
+    }
+
+    # Default static routes
+    # -> /m : Media (Assets) Route
+    location /m/ {
+        # Requests to /m are internally mapped to /app/views/assets
+        alias {{ root }}/app/views/assets/;
+
+        # Caching
+        expires    7d;
+    }
+
+    # -> /u : Uploads Route
+    location /u/ {
+        # Requests to /u are internally mapped to /uploads
+        alias {{ root }}/app/uploads/;
+
+        # Caching
+        expires    7d;
+    }
+
+
+    # -> /amm : App Module Media (Assets) Route
+    location ~ ^/amm/([a-z-_]+)/(.+) {
+        rewrite ^/amm/([a-z-_]+)/(.+) /app/modules/$1/views/assets/$2 last;
+
+        # Caching
+        expires    7d;
+    }
+
+    # Default redirection
+    # / -> /f/
+    # We assume everyone wants to view the front home
+    location = / {
+        rewrite ^ /f/ permanent;
+    }
+}

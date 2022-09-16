@@ -1,0 +1,45 @@
+- name: Domain
+  hosts: all
+  become: true
+
+  vars:
+    certbot_auto_renew_user: root
+    certbot_install_method: snap
+    certbot_create_method: standalone
+    certbot_admin_email: "{{ ssl_email }}"
+    certbot_auto_renew: true
+    certbot_create_if_missing: true
+    certbot_certs:
+      - domains:
+        - "{{ domain }}"
+    certbot_create_standalone_stop_services:
+      - nginx
+
+  roles:
+    - geerlingguy.certbot
+
+  tasks:
+    - name: Remove NGINX default virtual host
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      tags: nginx
+
+    - name: Add proper NGINX virtual host
+      template:
+        src: "{{ playbook_dir }}/../templates/nginx/app.conf.j2"
+        dest: "/etc/nginx/sites-available/ezekiel"
+      tags: nginx
+
+    - name: Enable NGINX virtual host for Ezekiel
+      file:
+        src: /etc/nginx/sites-available/ezekiel
+        dest: /etc/nginx/sites-enabled/ezekiel
+        state: link
+      tags: nginx
+
+    - name: Restart NGINX
+      service:
+        name: nginx
+        state: restarted
+      tags: nginx

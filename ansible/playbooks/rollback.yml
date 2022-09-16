@@ -1,0 +1,32 @@
+- name: Rollback
+  hosts: all
+  become: true
+  become_user: adriel
+  become_method: su
+
+  tasks:
+    - ping: ~
+
+    - find:
+        path: /var/www/html/app/versions
+      register: result
+
+    - set_fact:
+        versions: "{{ result.files|map(attribute='path')|list|sort }}"
+
+    - pause:
+        prompt: |
+          Choose version to rollback to:
+          {% for version in versions %}
+            {{ loop.index }} -> {{ version.split('/')[-1].replace('-', ' ', 1).replace('.tar.gz', '') }}
+          {% endfor %}
+      register: result
+
+    - set_fact:
+        selected_version: "{{ versions[result.user_input|int - 1] }}"
+
+    - name: Decompress version inside "current" directory
+      unarchive:
+        src: "{{ selected_version }}"
+        dest: /var/www/html/app/current
+        remote_src: true

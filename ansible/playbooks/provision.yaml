@@ -1,0 +1,140 @@
+- name: Provision
+  hosts: all
+  become: true
+
+  tasks:
+    - ping: ~
+
+    - name: Install PHP-FPM dependencies
+      package:
+        name:
+          - software-properties-common
+          - lsb-release
+          - apt-transport-https
+          - ca-certificates
+        state: present
+
+    - name: Update APT repositories cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade installed packages
+      apt:
+        upgrade: safe
+
+    - name: Add Ondrej Sury's apt key
+      apt_key:
+        url: https://packages.sury.org/php/apt.gpg
+        id: 15058500A0235D97F5D10063B188E2B695BD4743
+        state: present
+
+    - name: Add Ondrej Sury's repo
+      apt_repository:
+        repo: "deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main"
+        state: present
+
+    - name: Update apt caches after PHP-FPM repo is added
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      package:
+        name: nginx
+        state: present
+
+    - name: Install php with modules and fpm packages
+      package:
+        name:
+          - "php{{ php_version }}-fpm"
+          - "php{{ php_version }}-cli"
+          - "php{{ php_version }}-curl"
+          - "php{{ php_version }}-opcache"
+          - "php{{ php_version }}-pdo"
+          - "php{{ php_version }}-pgsql"
+          - "php{{ php_version }}-mbstring"
+          - "php{{ php_version }}-mcrypt"
+          - "php{{ php_version }}-common"
+          - "php{{ php_version }}-dev"
+          - "php{{ php_version }}-gd"
+          - "php{{ php_version }}-zip"
+          - "php{{ php_version }}-soap"
+        state: present
+
+    - name: Install PostgresSQL (with Python library for Ansible)
+      package:
+        name:
+          - postgresql
+          - postgresql-contrib
+          - libpq-dev
+          - python3-psycopg2
+        state: present
+
+    - name: Install CRON
+      package:
+        name: cron
+        state: present
+
+    - name: Install tree
+      package:
+        name: tree
+        state: present
+
+    - name: Download and install Composer
+      shell: curl -sS https://getcomposer.org/installer | php
+      args:
+        chdir: /usr/src/
+        creates: /usr/local/bin/composer
+        warn: false
+
+    - name: Add Composer to global path
+      copy:
+        dest: /usr/local/bin/composer
+        group: root
+        mode: '0755'
+        owner: root
+        src: /usr/src/composer.phar
+        remote_src: yes
+
+    - name: Install Uncomplicated Firewall (ufw)
+      package:
+        name: ufw
+
+    - name: Set brute-force limit on SSH
+      community.general.ufw:
+        rule: limit
+        port: ssh
+        proto: tcp
+
+    - name: Allow all access to tcp ports 80 and 443
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      with_items:
+        - 80
+        - 443
+
+    - name: Create group that will possess and run the project
+      group:
+        name: www-ezekiel
+        state: present
+
+    - name: Create user in the group
+      ansible.builtin.user:
+        name: adriel
+        password: ""
+        groups: www-ezekiel
+        home: /home/adriel
+        generate_ssh_key: false
+        umask: 0002
+        state: present
+        shell: /bin/bash
+
+    - name: Set proper permissions for web assets
+      command: "{{ item }}"
+      with_items:
+        - chown -R root:www-ezekiel /var/www
+        - chmod 2775 /var/www
+        - find /var/www -type d -exec chmod 2775 {} +
+        - find /var/www -type f -exec chmod 0664 {} +
+

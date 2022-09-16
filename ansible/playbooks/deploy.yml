@@ -1,0 +1,130 @@
+- name: Deploy
+  hosts: all
+  become: true
+  become_user: adriel
+  become_method: su
+
+  tasks:
+    - ping: ~
+
+    - name: Create database
+      postgresql_db:
+        name: "project"
+        state: present
+      become: yes
+      become_user: postgres
+
+    - name: Create database user
+      postgresql_user:
+        name: ezekiel
+        password: ezekiel
+        state: present
+      become: yes
+      become_user: postgres
+
+    - name: Grant access to the database for Ezekiel
+      postgresql_privs:
+        type: database
+        database: project
+        roles: ezekiel
+        grant_option: no
+        privs: all
+      become: yes
+      become_user: postgres
+
+    - name: Create remote deployment dir structure
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - /var/www/html/app
+        - /var/www/html/app/current
+        - /var/www/html/app/versions
+        - /var/www/html/app/shared
+
+    - name: Determine whether code is pushed already
+      become: false
+      command: git diff --exit-code
+      delegate_to: localhost
+      args:
+        chdir: "{{ playbook_dir }}/../../"
+      register: need_to_push
+      failed_when: need_to_push.rc != 1 and need_to_push.rc != 0
+
+    - name: Push local code to Github
+      become: false
+      command: "{{ item }}"
+      delegate_to: localhost
+      args:
+        chdir: "{{ playbook_dir }}/../../"
+      with_items:
+        - git add .
+        - git commit -m "Initial deployment"
+        - git push -u origin master
+      when:
+        - need_to_push.rc != 0
+
+    - name: Pull code remotely from Github
+      git:
+        repo: "{{ github_repository_url }}"
+        dest: /var/www/html/app/current
+        update: yes
+        force: yes
+        version: master
+
+    - name: Create shared folders
+      file:
+        path: "/var/www/html/app/shared/{{ item }}/"
+        state: directory
+      with_items:
+        - dependencies
+        - uploads
+        - logs
+
+    - name: Remove useless directories for runtime + Shared directories
+      file:
+        path: "/var/www/html/app/current/{{ item }}"
+        state: absent
+      with_items:
+        - ansible
+        - docker
+        - docker-compose.dev.yml
+        - dependencies
+        - uploads
+        - logs
+
+    - name: Link shared folders
+      file:
+        src: "/var/www/html/app/shared/{{ item }}/"
+        dest: "/var/www/html/app/current/{{ item }}"
+        state: link
+      with_items:
+        - dependencies
+        - uploads
+        - logs
+
+    - name: Install dependencies
+      command: composer install
+      args:
+        chdir: /var/www/html/app/current/
+
+    - name: Setup Ezekiel CLI alias
+      lineinfile:
+        path: /home/adriel/.bashrc
+        line: "alias ezekiel='./ezekiel'"
+        owner: adriel
+        regexp: "^alias ezekiel='./ezekiel'$"
+        insertafter: EOF
+        create: True
+        state: present
+
+    - name: Upload dotenv configuration for production
+      copy:
+        src: "{{ playbook_dir }}/../../configuration/.production.env"
+        dest: /var/www/html/app/current/configuration/.custom.env
+      tags: conf
+
+    - name: Run migrations
+      command: ./ezekiel run:migrations
+      args:
+        chdir: /var/www/html/app/current
