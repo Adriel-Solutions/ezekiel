@@ -1,6 +1,6 @@
 all:
   hosts:
-    ansibler:
+    your-ssh-host:
       domain: "your domain without protocol"
       github_repository_url: "git repository url ending with .git"
       php_version: 8.1
