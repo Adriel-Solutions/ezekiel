@@ -66,7 +66,7 @@
 
     - name: Pull code remotely from Github
       git:
-        repo: "{{ github_repository_url }}"
+        repo: "{{ git_repository_url }}"
         dest: /var/www/html/app/current
         update: yes
         force: yes
