@@ -2,7 +2,6 @@
 
     namespace native\thirdparties;
 
-    use native\libs\Options;
     use native\libs\Thirdparty;
 
     class Uploads extends Thirdparty {
@@ -12,7 +11,7 @@
          * @param {$_FILE} $file : The PHP File object to write on disk
          */
         public function store($name, $file) {
-            $destination = __DIR__ . '/../../' . Options::get('UPLOADS_DIR') . '/' . $name;
+            $destination = DIR_ROOT . '/storage/uploads/' . $name;
 
             if(file_exists($destination)) self::erase($destination);
 
@@ -24,7 +23,7 @@
          * @param {string} $name : The name of the file to erase
          */
         public function erase($name) {
-            $destination = __DIR__ . '/../../' . Options::get('UPLOADS_DIR') . '/' . $name;
+            $destination = DIR_ROOT . '/storage/uploads/' . $name;
             unlink($destination);
         }
     }

@@ -78,8 +78,7 @@
         state: directory
       with_items:
         - dependencies
-        - uploads
-        - logs
+        - storage
 
     - name: Remove useless directories for runtime + Shared directories
       file:
@@ -90,8 +89,7 @@
         - docker
         - docker-compose.dev.yml
         - dependencies
-        - uploads
-        - logs
+        - storage
 
     - name: Link shared folders
       file:
@@ -100,21 +98,39 @@
         state: link
       with_items:
         - dependencies
-        - uploads
+        - storage
+
+    - name: Recreate storage structure
+      file:
+        path: "/var/www/html/app/shared/storage/{{ item }}"
+        state: directory
+      with_items:
         - logs
+        - uploads
 
     - name: Recreate logs structure
       file:
-        path: "/var/www/html/app/shared/logs/{{ item }}"
+        path: "/var/www/html/app/shared/storage/logs/{{ item }}"
         state: directory
       with_items:
         - nginx
         - php
         - app
 
+    - name: Recreate uploads structure
+      file:
+        path: "/var/www/html/app/shared/storage/uploads"
+        state: directory
+
     - name: Set proper permissions for PHP logs
       file:
-        path: "/var/www/html/app/shared/logs/php"
+        path: "/var/www/html/app/shared/storage/logs/php"
+        mode: "757"
+        state: directory
+
+    - name: Set proper permissions for PHP uploads
+      file:
+        path: "/var/www/html/app/shared/storage/uploads"
         mode: "757"
         state: directory
 

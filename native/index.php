@@ -46,7 +46,7 @@
         ini_set('ignore_repeated_errors', TRUE);
         ini_set('display_errors', FALSE);
         ini_set('log_errors', TRUE);
-        ini_set('error_log', DIR_ROOT . '/logs/php/error.log');
+        ini_set('error_log', DIR_ROOT . '/storage/logs/php/error.log');
     }
 
     /**
