@@ -4,8 +4,9 @@
 
     use ArrayAccess;
     use native\libs\Record;
+    use native\libs\Service;
 
-    class Records implements ArrayAccess {
+    class Records implements ArrayAccess  {
         private array $data = [];
 
         public function offsetGet(mixed $offset) : ?Record 
@@ -29,6 +30,19 @@
         public function offsetUnset(mixed $offset) : void 
         {
             unset($this->data[$offset]);
+        }
+
+        public function set_data(array $d) : void
+        {
+            $this->data = $d;
+        }
+
+        public static function from(array $entries, Service $s) : Records
+        {
+            $collection = new Records();
+            $records_objects = array_map(fn($r) => new Record($r, $s), $entries);
+            $collection->set_data($records_objects);
+            return $collection;
         }
     }
 
