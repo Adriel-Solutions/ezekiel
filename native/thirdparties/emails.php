@@ -6,16 +6,20 @@
     use native\libs\Thirdparty;
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\Exception;
+    use Throwable;
 
     class Emails extends Thirdparty {
-        public function render_from_module($module, $key, $params = []) {
+
+        public function render_from_module(string $module, string $key, array $params = []) : string
+        {
             ob_start();
             include __DIR__ . "/../../app/modules/" . $module . "/views/emails" . $key . ".php";
             $output = ob_get_clean();
             return $output;
         }
 
-        public function render($key, $params = []) {
+        public function render(string $key, array $params = []) : string
+        {
             ob_start();
             include __DIR__ . "/../../app/views/emails" . $key . ".php";
             $output = ob_get_clean();
@@ -28,7 +32,7 @@
          * @param {string} body The email's body (HTML code)
          * @return {boolean} TRUE when email was sent, FALSE when not
          */
-        public function send($params) {
+        public function send(array $params) : bool {
             $mail = new PHPMailer(true);
             try {
                 $mail->IsSMTP();
@@ -36,8 +40,8 @@
                 $mail->SMTPAuth = true;
 
                 $mail->Host = Options::get('SMTP_HOST');
-                $mail->SMTPSecure = Options::get('SMTP_SECURITY'); 
-                $mail->Port = Options::get('SMTP_PORT');  
+                $mail->SMTPSecure = Options::get('SMTP_SECURITY');
+                $mail->Port = Options::get('SMTP_PORT');
 
                 $mail->Username = Options::get('SMTP_USER');
                 $mail->Password = Options::get('SMTP_PASS');
@@ -46,7 +50,7 @@
 
                 if(!empty(Options::get('SMTP_FROM')))
                     $mail->From = Options::get('SMTP_FROM');
-                else 
+                else
                     $mail->From = Options::get('SMTP_USER');
 
                 if(!empty(Options::get('SMTP_NAME')))
@@ -59,11 +63,9 @@
                 $mail->CharSet = 'UTF-8';
 
                 $mail->Send();
-
-                return true;
-            } catch (Exception $e) {
-                var_dump($e);
+            } catch (Throwable $e) {
                 return false;
             }
+            return true;
         }
     }

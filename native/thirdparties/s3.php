@@ -9,7 +9,8 @@
     class S3 extends Thirdparty {
         private $client;
 
-        private function setup_client() {
+        private function setup_client() : void
+        {
             if(!empty($this->client)) return;
 
             $this->client = new \Aws\S3\S3Client([
@@ -29,7 +30,8 @@
          * @param {$_FILE} $file : The raw content to store
          * @return {boolean} TRUE if storing the file worked, FALSE otherwise
          */
-        public function store($name, $content) {
+        public function store($name, $content) : bool
+        {
             $this->setup_client();
 
             try {
@@ -51,7 +53,8 @@
          * @param {string} $name : The name of the file to read
          * @return {string} The content of the file
          */
-        public function get($name) {
+        public function get($name) : string
+        {
             $this->setup_client();
             $content = null;
 
@@ -71,7 +74,8 @@
         /**
          * @return {boolean} TRUE if erasing the file worked, FALSE otherwise
          */
-        public function erase($name) {
+        public function erase($name) : bool
+        {
             $this->setup_client();
 
             try {
@@ -85,6 +89,5 @@
             }
 
             return true;
-
         }
     }
