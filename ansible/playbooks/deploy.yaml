@@ -11,26 +11,42 @@
       postgresql_db:
         name: "project"
         state: present
-      become: yes
+      become: true
       become_user: postgres
 
-    - name: Create database user
+    - name: Create database user ezekiel
       postgresql_user:
         name: ezekiel
         password: ezekiel
         state: present
-      become: yes
+      become: true
       become_user: postgres
 
-    - name: Grant access to the database for Ezekiel
+    - name: Grant access to the database for ezekiel
       postgresql_privs:
         type: database
         database: project
         roles: ezekiel
         grant_option: no
         privs: all
-      become: yes
+      become: true
       become_user: postgres
+
+    - name: Allow md5 connection for the user ezekiel
+      postgresql_pg_hba:
+        dest: "~/data/pg_hba.conf"
+        contype: local
+        databases: project
+        method: md5
+        users: ezekiel
+        create: true
+      become: true
+      become_user: postgres
+
+    - name: Restart Postgres
+      service:
+        name: postgresql
+        state: restarted
 
     - name: Create remote deployment dir structure
       file:
@@ -42,6 +58,19 @@
         - /var/www/html/app/versions
         - /var/www/html/app/shared
 
+    - name: Determine whether repository must be created locally
+      become: false
+      delegate_to: localhost
+      stat:
+        path: "{{ playbook_dir }}/../../.git"
+      register: git_result
+
+    - name: Setup git if not already
+      become: false
+      command: git init && git remote add {{ git_repository_url }}
+      delegate_to: localhost
+      when: not git_result.stat.exists
+
     - name: Determine whether code is pushed already
       become: false
       command: git diff --exit-code
@@ -51,7 +80,7 @@
       register: need_to_push
       failed_when: need_to_push.rc != 1 and need_to_push.rc != 0
 
-    - name: Push local code to Github
+    - name: Push local code to git repo
       become: false
       command: "{{ item }}"
       delegate_to: localhost
@@ -71,6 +100,14 @@
         update: yes
         force: yes
         version: master
+
+    - name: Run database setup SQL script
+      postgresql_query:
+        db: project
+        path_to_script: /var/lib/pgsql/test.sql
+      become: true
+      become_user: postgres
+
 
     - name: Create shared folders
       file:
