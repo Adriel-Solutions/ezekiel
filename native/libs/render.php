@@ -24,6 +24,14 @@
             echo $output;
         }
 
+        public static function native_partial($key, $params = []) {
+            $key = strtolower($key);
+            ob_start();
+            include DIR_NATIVE . "/views/partials/$key.php";
+            $output = ob_get_clean();
+            echo $output;
+        }
+
         public static function module_partial($module, $key, $params = []) {
             $key = strtolower($key);
             ob_start();
@@ -48,6 +56,14 @@
             echo $output;
         }
 
+        public static function native_layout($key, $params = []) {
+            $key = strtolower($key);
+            ob_start();
+            include DIR_NATIVE . "/views/layouts/$key.php";
+            $output = ob_get_clean();
+            echo $output;
+        }
+
         /**
          * Outputs the content of a Component (HTML-in-PHP file)
          * and gives it parameters using a variable named $params
@@ -60,6 +76,14 @@
             $key = strtolower($key);
             ob_start();
             include DIR_APP . "/views/components/$key.php";
+            $output = ob_get_clean();
+            echo $output;
+        }
+
+        public static function native_component($key, $params = []) {
+            $key = strtolower($key);
+            ob_start();
+            include DIR_NATIVE . "/views/components/$key.php";
             $output = ob_get_clean();
             echo $output;
         }

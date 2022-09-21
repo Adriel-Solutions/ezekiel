@@ -47,17 +47,25 @@
     function HC($key, $params = []) {
         Render::component($key, $params);
     }
+    function HNC($key, $params = []) {
+        Render::native_component($key, $params);
+    }
 
     function HP($key, $params = []) {
         Render::partial($key, $params);
     }
-
+    function HNP($key, $params = []) {
+        Render::native_partial($key, $params);
+    }
     function HMP($module, $key, $params = []) {
         Render::module_partial($module, $key, $params);
     }
 
     function HL($key, $params = []) {
         Render::layout($key, $params);
+    }
+    function HNL($key, $params = []) {
+        Render::native_layout($key, $params);
     }
 
     /**
