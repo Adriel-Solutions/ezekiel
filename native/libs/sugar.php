@@ -90,6 +90,17 @@
             );
     }
 
+    function front_native_asset_path(string $path) : string {
+        return 
+            Options::get('ROOT_NATIVE_ASSETS') 
+            . $path 
+            . (
+                ( Options::get('MODE')  === 'PRODUCTION' )
+                ? '?v=' . Options::get('ASSETS_VERSION') 
+                : '' 
+            );
+    }
+
     function front_module_asset_path(string $module, string $path) : string {
         return 
             Options::get('ROOT_MODULES_ASSETS') 
