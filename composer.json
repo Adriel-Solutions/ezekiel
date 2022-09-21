@@ -19,7 +19,6 @@
     }
   },
   "require": {
-    "phpmailer/phpmailer": "^6.5",
     "aws/aws-sdk-php": "^3.233",
     "phpmailer/phpmailer": "dev-master",
     "phpoffice/phpspreadsheet": "dev-master"
