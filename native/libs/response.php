@@ -165,6 +165,9 @@
          *                         -> {string} title : The SEO title, Sample page by default
          *                         -> {string} slug : The slug for the page, for CSS purposes, sample by default
          *                         -> {string} description : The SEO description for the page, Sample description by default
+         *                         -> {string} module : The name of the module to take the views from
+         *                         -> {bool} use_native_views : Where to take the skeletons views from (native by default)
+         *                         -> {bool} use_native_skeletons : Where to take the page views from (native by default)
          *                         -> {array<array>} scripts : The list of JS scripts for the current page
          *                         -> {array<string>} styles : The list of CSS styles for the current page
          *                         -> {string} view : The name of the view, without the .php extension
@@ -184,6 +187,8 @@
             $styles = $params['styles'] ?? [];
 
             // Output-related
+            $use_native_skeletons = !isset($params['use_native_skeletons']) ? true : $params['use_native_skeletons'];
+            $use_native_views = !isset($params['use_native_views']) ? true : $params['use_native_views'];
             $view = 'index';
             if(!empty($params['view']));
                 $view = $params['view'];
@@ -197,26 +202,27 @@
             http_response_code($code);
             header('Content-type: text/html');
 
-            $views_dir = DIR_APP . '/views';
+            $skeletons_dir = ($use_native_skeletons ? DIR_NATIVE : DIR_APP) . '/views';
+            $views_dir = ($use_native_views ? DIR_NATIVE : DIR_APP) . '/views';
 
             $module_views_dir = empty($params['module']) 
                 ? '' 
                 : DIR_APP . '/modules/' . $params['module'] . '/views';
 
 
-            include $views_dir . '/skeletons/html_open.php';
-            include $views_dir . '/skeletons/head_open.php';
-            include $views_dir . '/skeletons/head_content.php';
-            include $views_dir . '/skeletons/head_close.php';
-            include $views_dir . '/skeletons/body_open.php';
+            include $skeletons_dir . '/skeletons/html_open.php';
+            include $skeletons_dir . '/skeletons/head_open.php';
+            include $skeletons_dir . '/skeletons/head_content.php';
+            include $skeletons_dir . '/skeletons/head_close.php';
+            include $skeletons_dir . '/skeletons/body_open.php';
 
             if(empty($params['module']))
                 include $views_dir . "$view.php";
             else
                 include $module_views_dir . "$view.php";
 
-            include $views_dir . '/skeletons/body_close.php';
-            include $views_dir . '/skeletons/html_close.php';
+            include $skeletons_dir . '/skeletons/body_close.php';
+            include $skeletons_dir . '/skeletons/html_close.php';
 
             $this->_is_sent = true;
 
