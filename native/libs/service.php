@@ -40,6 +40,9 @@
         protected string $table_read;
         protected string $table_write;
 
+        // The table's primary key
+        protected string $primary_key;
+
         // Whether to return plain arrays, or Record objects
         private bool $is_record_asked;
 
@@ -101,6 +104,11 @@
             else
                 $this->schema = null !== $instance->get_schema() ? $instance->get_schema() : [];
 
+            if(!isset($instance))
+                $this->primary_key = isset($this->primary_key) ? $this->primary_key : 'pk';
+            else
+                $this->primary_key = null !== $instance->get_primary_key() ? $instance->get_primary_key() : 'pk';
+
             self::$is_encryption_enabled = Options::get('ENCRYPTION_ENABLED');
             self::$encryption_key = Options::get('ENCRYPTION_KEY');
 
@@ -125,6 +133,8 @@
 
         public function set_relation($name, $relation) : void { $this->relations[$name] = $relation; }
         public function as_records() : static { $this->is_record_asked = true; return $this; }
+
+        public function get_primary_key() : string { return $this->primary_key; }
 
         /**
          * Turn an array of $column => $value WHERE clauses
@@ -479,8 +489,8 @@
 
         protected function _get_primary_key() : string {
             if ( self::$is_encryption_enabled )
-                return $this->_build_decrypted_column_str('pk');
-            return 'pk';
+                return $this->_build_decrypted_column_str($this->primary_key);
+            return $this->primary_key;
         }
 
         /**
@@ -539,7 +549,7 @@
                 return new Record($result, $this);
 
             // Multiple rows -> Array of Record
-            return array_map(fn($r) => new Record($r, $this),  $result);
+            return Records::from($result, $this);
         }
 
         /**
@@ -605,7 +615,7 @@
 
             $rows = array_map(fn($r) => $r[$column], $rows);
 
-            return $this->_output($rows);
+            return $rows;
         }
 
         /**
@@ -829,9 +839,10 @@
             );
 
             if ( self::$is_encryption_enabled ) {
-                $parenthesis_str .= ' , pk' ;
-                $values_str .= ' , ' . $this->_build_encrypted_placeholder_str('pk');
-                $payload = array_merge($payload , [ 'pk' => UUID::v5() ]);
+                $primary_key = $this->primary_key;
+                $parenthesis_str .= " , $primary_key" ;
+                $values_str .= ' , ' . $this->_build_encrypted_placeholder_str($primary_key);
+                $payload = array_merge($payload , [ $primary_key => UUID::v5() ]);
             }
 
             $returned_columns = $this->_build_returned_columns_str();
@@ -977,7 +988,7 @@
                     }
                     // Case when local column is known (pk) and foreign column only is given
                     else {
-                        $local_column = 'pk';
+                        $local_column = $this->primary_key;
                         $join_column = $relation['column'];
                     }
 
@@ -1016,13 +1027,13 @@
                             $local_column = $relation['local_column'];
                             $foreign_column = 'pk';
                         } else if(empty($relation['local_column'])) {
-                            $local_column = 'pk';
+                            $local_column = $this->primary_key;
                             $foreign_column = $relation['foreign_column'];
                         }
                     }
                     // Case when local column is known (pk) and foreign column only is given
                     else {
-                        $local_column = 'pk';
+                        $local_column = $this->primary_key;
                         $foreign_column = $relation['column'];
                     }
 
