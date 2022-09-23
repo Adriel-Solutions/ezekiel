@@ -1,6 +1,3 @@
--- default database
-\c project ezekiel
-
 -- updated_at refresh function (to be called inside a trigger)
 CREATE OR REPLACE FUNCTION refresh_updated_at()
 RETURNS TRIGGER AS $$

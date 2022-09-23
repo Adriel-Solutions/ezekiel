@@ -34,7 +34,7 @@
 
     - name: Allow md5 connection for the user ezekiel
       postgresql_pg_hba:
-        dest: "~/data/pg_hba.conf"
+        dest: "~/pg_hba.conf"
         contype: local
         databases: project
         method: md5
@@ -47,6 +47,15 @@
       service:
         name: postgresql
         state: restarted
+      become: true
+      become_user: root
+
+    - name: Save setup init script remotely
+      template:
+        src: "{{ playbook_dir }}/../templates/postgres/db.sql"
+        dest: "~/db.sql"
+      become: true
+      become_user: postgres
 
     - name: Create remote deployment dir structure
       file:
@@ -67,7 +76,15 @@
 
     - name: Setup git if not already
       become: false
-      command: git init && git remote add {{ git_repository_url }}
+      command: "{{ item }}"
+      args:
+        chdir: "{{ playbook_dir }}/../../"
+      with_items:
+        - git init
+        - git remote add origin "{{ git_repository_url }}"
+        - git add .
+        - git commit -m "Initial deployment"
+        - git push -u origin master
       delegate_to: localhost
       when: not git_result.stat.exists
 
@@ -102,12 +119,11 @@
         version: master
 
     - name: Run database setup SQL script
-      postgresql_query:
+      community.postgresql.postgresql_script:
         db: project
-        path_to_script: /var/lib/pgsql/test.sql
+        path: "~/db.sql"
       become: true
       become_user: postgres
-
 
     - name: Create shared folders
       file:
@@ -159,16 +175,22 @@
         path: "/var/www/html/app/shared/storage/uploads"
         state: directory
 
+    # Todo : Fix permissions / owner
     - name: Set proper permissions for PHP logs
       file:
-        path: "/var/www/html/app/shared/storage/logs/php"
-        mode: "757"
+        path: "{{ item }}"
+        mode: "777"
         state: directory
+      with_items:
+        - "/var/www/html/app/shared/storage"
+        - "/var/www/html/app/shared/storage/logs"
+        - "/var/www/html/app/shared/storage/logs/php"
 
+    # Todo : Fix permissions / owner
     - name: Set proper permissions for PHP uploads
       file:
         path: "/var/www/html/app/shared/storage/uploads"
-        mode: "757"
+        mode: "777"
         state: directory
 
     - name: Install dependencies
@@ -196,4 +218,3 @@
       command: ./ezekiel run:migrations
       args:
         chdir: /var/www/html/app/current
-

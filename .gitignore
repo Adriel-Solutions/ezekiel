@@ -6,7 +6,7 @@ VagrantFile
 !configuration/sample.env
 uploads
 
-dependencies/
+/dependencies
 !dependencies/.gitkeep
 !dependencies/readme.md
 private.*
