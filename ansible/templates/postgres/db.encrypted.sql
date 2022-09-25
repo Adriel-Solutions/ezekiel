@@ -11,7 +11,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- migrations
-CREATE TABLE migrations (
+CREATE TABLE IF NOT EXISTS migrations (
     pk BYTEA NOT NULL,
     name BYTEA NOT NULL,
 
@@ -19,7 +19,7 @@ CREATE TABLE migrations (
 );
 
 -- jobs
-CREATE TABLE jobs (
+CREATE TABLE IF NOT EXISTS jobs (
     pk BYTEA NOT NULL,
     class BYTEA NOT NULL,
 
@@ -38,4 +38,3 @@ CREATE TABLE jobs (
 
     PRIMARY KEY (pk)
 );
-

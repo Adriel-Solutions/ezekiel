@@ -8,7 +8,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- migrations
-CREATE TABLE migrations (
+CREATE TABLE IF NOT EXISTS migrations (
     pk INT GENERATED ALWAYS AS IDENTITY,
     name TEXT NOT NULL,
 
@@ -16,7 +16,7 @@ CREATE TABLE migrations (
 );
 
 -- jobs
-CREATE TABLE jobs (
+CREATE TABLE IF NOT EXISTS jobs (
     pk INT GENERATED ALWAYS AS IDENTITY,
     class TEXT NOT NULL,
 
@@ -35,4 +35,3 @@ CREATE TABLE jobs (
 
     PRIMARY KEY (pk)
 );
-
