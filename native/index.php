@@ -70,7 +70,6 @@
      * Log initialization
      */
     Logger::load();
-    Logger::info('ok');
 
     /**
      * The app is just a global HTTP router
