@@ -605,11 +605,12 @@
             $page_payload = $this->_build_page_payload($page_parameters);
             $order_str = $this->_build_order_str($page_parameters);
 
+            $actual_column = $column;
             if(self::$is_encryption_enabled)
-                $column = $this->_build_decrypted_column_str($column);
+                $actual_column = $this->_build_decrypted_column_str($column) . ' AS ' . $column;
 
             $rows = Database::query(
-                "SELECT DISTINCT $column FROM $table $where_str $order_str $page_str",
+                "SELECT DISTINCT $actual_column FROM $table $where_str $order_str $page_str",
                 array_merge($where_payload, $page_payload)
             );
 
