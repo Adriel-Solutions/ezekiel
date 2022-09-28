@@ -26,6 +26,7 @@
     use \native\libs\Router;
     use \native\libs\Database;
     use \native\libs\I18n;
+    use native\libs\Logger;
 
     /**
      * Project configuration
@@ -64,6 +65,12 @@
      * I18n initialization
      */
     I18n::load();
+
+    /**
+     * Log initialization
+     */
+    Logger::load();
+    Logger::info('ok');
 
     /**
      * The app is just a global HTTP router

@@ -21,7 +21,8 @@
   "require": {
     "aws/aws-sdk-php": "^3.233",
     "phpmailer/phpmailer": "dev-master",
-    "phpoffice/phpspreadsheet": "dev-master"
+    "phpoffice/phpspreadsheet": "dev-master",
+    "monolog/monolog": "3.x-dev"
   },
   "require-dev": {
     "vimeo/psalm": "5.x-dev",
