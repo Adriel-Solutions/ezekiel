@@ -14,7 +14,7 @@
         {
             self::$writers = [];
             $logs_dir = __DIR__ . '/../../storage/logs/app';
-            foreach([ 'debug' ,'info' , 'notice' , 'warning' , 'error' , 'critical' , 'alert'] as $level) {
+            foreach([ 'debug' ,'info' , 'notice' , 'warning' , 'error' , 'critical' , 'alert' , 'emergency'] as $level) {
                 self::$writers[$level] = new BaseLogger($level);
                 $stream = new StreamHandler($logs_dir . '/' . $level . '.log', Level::fromName(ucfirst($level)));
                 self::$writers[$level]->pushHandler($stream);
@@ -28,4 +28,5 @@
         public static function error($mixed, $content = []) { self::$writers['error']->error($mixed, $content); }
         public static function critical($mixed, $content = []) { self::$writers['critical']->critical($mixed, $content); }
         public static function alert($mixed, $content = []) { self::$writers['alert']->alert($mixed, $content); }
+        public static function emergency($mixed, $content = []) { self::$writers['emergency']->emergency($mixed, $content); }
     }
