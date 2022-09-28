@@ -18,7 +18,7 @@ if [[ -z $1 || $1 != "--no-random" ]]; then
 fi
 
 docker-compose -f docker-compose.dev.yml up -d
-./setup/scripts/docker/install-dependencies.sh
+./ezekiel install:dependencies
 ./setup/scripts/local/create-new-env.sh
 ./setup/scripts/docker/reset-db.sh
 ./setup/scripts/docker/run-db-migrations.sh
