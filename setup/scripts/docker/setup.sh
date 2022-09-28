@@ -17,6 +17,10 @@ if [[ -z $1 || $1 != "--no-random" ]]; then
     done
 fi
 
+# Generate random port for the web container to prevent collision
+random_port=$(jot -r 1 2000 300)
+sed -i '' -E "/ports/{N;s/- [0-9]+\:80/- $random_port:80/;}" docker-compose.dev.yml
+
 docker-compose -f docker-compose.dev.yml up -d
 ./ezekiel install:dependencies
 ./setup/scripts/local/create-new-env.sh
