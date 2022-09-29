@@ -69,9 +69,11 @@
           - python3-psycopg2
         state: present
 
-    - name: Install CRON
+    - name: Install CRON and Git
       package:
-        name: cron
+        name: 
+          - cron
+          - git
         state: present
 
     - name: Install tree
