@@ -218,3 +218,13 @@
       command: ./ezekiel run:migrations
       args:
         chdir: /var/www/html/app/current
+
+    - name: Ensure Nginx is running
+      service:
+        - name: nginx
+        - state: started
+
+    - name: Ensure CRON is running
+      service:
+        - name: nginx
+        - state: started

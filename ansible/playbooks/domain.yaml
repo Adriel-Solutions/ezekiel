@@ -37,9 +37,3 @@
         dest: /etc/nginx/sites-enabled/ezekiel
         state: link
       tags: nginx
-
-    # - name: Restart NGINX
-    #   service:
-    #     name: nginx
-    #     state: restarted
-    #   tags: nginx
