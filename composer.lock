@@ -1609,12 +1609,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Adriel-Solutions/ezekiel-cli.git",
-                "reference": "54989a5fb453fdc5b19dcf8b3ab96ba4281dd7e0"
+                "reference": "2a877e9dc6cc81968e97d4baf24ec1b4f8965697"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Adriel-Solutions/ezekiel-cli/zipball/54989a5fb453fdc5b19dcf8b3ab96ba4281dd7e0",
-                "reference": "54989a5fb453fdc5b19dcf8b3ab96ba4281dd7e0",
+                "url": "https://api.github.com/repos/Adriel-Solutions/ezekiel-cli/zipball/2a877e9dc6cc81968e97d4baf24ec1b4f8965697",
+                "reference": "2a877e9dc6cc81968e97d4baf24ec1b4f8965697",
                 "shasum": ""
             },
             "default-branch": true,
@@ -1637,7 +1637,7 @@
                 "issues": "https://github.com/Adriel-Solutions/ezekiel-cli/issues",
                 "source": "https://github.com/Adriel-Solutions/ezekiel-cli/tree/master"
             },
-            "time": "2022-09-28T13:13:52+00:00"
+            "time": "2022-09-29T11:42:45+00:00"
         },
         {
             "name": "amphp/amp",
