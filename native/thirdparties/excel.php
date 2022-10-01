@@ -10,10 +10,6 @@
 
         /**
          * Generate an XLSX file from parameters
-         *
-         * @param {array} $params The parameters for generating the export
-         *                -> Rows
-         *                -> Title
          */
         public function create_spreadsheet(string $title, array $headers, array $rows, array $style = []) : string {
             $spreadsheet = new Spreadsheet();
