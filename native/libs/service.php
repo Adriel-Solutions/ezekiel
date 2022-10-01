@@ -25,6 +25,9 @@
      */
     class Service {
 
+        // The SQL database to use with this service
+        protected string $db;
+
         // The SQL table associated with the service
         protected string $table;
 
@@ -51,6 +54,16 @@
         private static string $encryption_key;
 
         public function __construct(FacadeService $instance = null) {
+            // The SQL database associated with the current service
+            if(!isset($instance))
+                $this->db = isset($this->db) 
+                               ? $this->db 
+                               : 'MAIN';
+            else
+                $this->db = null !== $instance->get_database()
+                               ? $instance->get_database() 
+                               : 'MAIN';
+
             // The SQL table associated with the current service
             if(!isset($instance))
                 $this->table = isset($this->table) 
@@ -135,6 +148,7 @@
         public function as_records() : static { $this->is_record_asked = true; return $this; }
 
         public function get_primary_key() : string { return $this->primary_key; }
+        public function get_database() : string { return $this->db; }
 
         /**
          * Turn an array of $column => $value WHERE clauses
@@ -560,6 +574,7 @@
          */
         public function exists(int|string $id) : bool 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $primary_key = $this->_get_primary_key();
@@ -580,6 +595,7 @@
          */
         public function exists_one(array $conditions) : bool 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions);
@@ -596,6 +612,7 @@
 
         public function pluck(string $column, array $conditions = [], array $page_parameters = []) : array
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $page_parameters['strict_search'] ?? true);
@@ -627,6 +644,7 @@
          */
         public function get(int|string $id) : array|Record
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $primary_key = $this->_get_primary_key();
@@ -643,6 +661,7 @@
 
         public function get_many(array $page_parameters) : array|Records
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $page_str = $this->_build_page_str($page_parameters);
@@ -667,6 +686,7 @@
          */
         public function get_all($page_parameters = []) : array|Records
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $page_str = $this->_build_page_str($page_parameters);
@@ -691,6 +711,7 @@
          */
         public function get_count() : int 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $rows = Database::query(
@@ -709,6 +730,7 @@
          */
         public function find_one(array $conditions, bool $is_strict = true) : array|Record 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $is_strict);
@@ -740,6 +762,7 @@
          */
         public function find_many(array $conditions, array $page_parameters = []) : array|Records
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $page_parameters['strict_search'] ?? true);
@@ -769,6 +792,7 @@
          */
         public function find_count(array $conditions, bool $is_strict = true) : int 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $is_strict);
@@ -790,6 +814,7 @@
          */
         public function find_all(array $conditions, array $page_parameters = []) : array|Records
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('read');
 
             $where_str = $this->_build_where_str($conditions, $page_parameters['strict_search'] ?? true);
@@ -818,6 +843,7 @@
          */
         public function create(array $payload) : array|Record 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('write');
 
             $payload = $this->_normalize_payload($payload);
@@ -869,6 +895,7 @@
          */
         public function update(int|string $id, array $payload) : array|Record
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('write');
 
             $primary_key = $this->_get_primary_key();
@@ -900,6 +927,7 @@
          */
         public function delete(int|string $id) : void 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('write');
 
             $primary_key = $this->_get_primary_key();
@@ -913,6 +941,7 @@
         // Update one or many using conditions
         public function find_and_update(array $conditions, array $payload) : array|Records
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('write');
 
             $where_str = $this->_build_where_str($conditions);
@@ -941,6 +970,7 @@
         // Delete one or many using conditions
         public function find_and_delete(array $conditions) : void 
         {
+            Database::use($this->db);
             $table = $this->_determine_table_for('write');
 
             $where_str = $this->_build_where_str($conditions);
@@ -966,6 +996,7 @@
          */
         public function populate(&$object, string $field, array $conditions = [], array $page_parameters = []) : void 
         {
+            Database::use($this->db);
             $relation = $this->relations[$field];
 
             $foreign_table = $relation['table'];

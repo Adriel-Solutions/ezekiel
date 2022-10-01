@@ -7,6 +7,7 @@
     use native\libs\Record;
 
     class Service {
+        protected ?string $db = null;
         protected ?string $table = null;
         protected ?string $primary_key = 'pk';
         protected array $relations = [];
@@ -15,6 +16,7 @@
         public function get_table() { return $this->table; }
         public function get_relations() { return $this->relations; }
         public function get_schema() { return $this->schema; }
+        public function get_database() { return $this->db; }
         public function get_primary_key() { return $this->primary_key; }
 
         private static function call_base_service($function, &...$arguments) : mixed

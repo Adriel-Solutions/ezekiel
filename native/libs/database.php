@@ -10,23 +10,46 @@
     class Database {
 
         /**
-         * Database instance
+         * Database instances
+         * array<PDO>
          */
-        public static PDO $db;
+        public static array $dbs = [];
+        private static PDO $current;
 
         /**
          * Connects to the project's database using dotenv settings
          */
         public static function load() : void {
-            self::$db = new PDO('pgsql:host=' . Options::get('DB_HOST')  .
-                                  ';dbname='  . Options::get('DB_NAME') .
-                                  ';client_encoding=' . 'utf8',
-                                                Options::get('DB_USER') ,
-                                                Options::get('DB_PASS') ,
-                                              [
-                                                  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                                              ]
-                        );
+            $instances = array_map('strtoupper', explode(',', Options::get('ACTIVE_DBS')));
+
+            // Loop through database nicknames
+            foreach($instances as $instance) {
+                // Extract settings using the database nickname for each parameter
+                $credentials = [];
+                foreach(['TYPE', 'HOST', 'NAME', 'USER', 'PASS'] as $key)
+                    $credentials[$key] = Options::get(sprintf("DB_%s_$key", $instance));
+
+                // Add a new PDO instance to our internal list
+                self::$dbs[$instance] = new PDO(
+                    $credentials['TYPE'] .
+                    ':host='    . $credentials['HOST']  .
+                    ';dbname='  . $credentials['NAME']  .
+                    ';client_encoding=' . 'utf8',
+                    $credentials['USER'],
+                    $credentials['PASS'],
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    ]
+                );
+            }
+
+            // Set default database connection
+            self::$current = self::$dbs['MAIN'];
+        }
+
+        public static function use(string $name) : void
+        {
+            self::$current = self::$dbs[$name];
         }
 
         /**
@@ -37,12 +60,12 @@
          * @return {array} The result of the SQL query execution against the database
          */
         public static function query(string $sql, array $params = []) : array {
-            $stmt = self::$db->prepare($sql);
+            $stmt = self::$current->prepare($sql);
             $stmt->execute($params ?? []);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         public function __destruct() {
-            self::$db = null;
+            self::$current = null;
         }
     }

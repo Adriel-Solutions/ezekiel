@@ -23,7 +23,7 @@
         public static function is_regex($value, $r) { return is_string($value) && preg_match($r, $value); }
         public static function is_email($value) { return filter_var($value, FILTER_VALIDATE_EMAIL) !== false; }
 
-        public static function is_date($value) { return preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) == true; }
+        public static function is_date($value) { return is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) == true; }
 
         public static function is_boolean($value) { return $value === false || $value === true || in_array(strtolower(strval($value)), [ 'true', 'false', 'yes' , 'no', '0' , '1' ]); }
 
