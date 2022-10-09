@@ -16,6 +16,20 @@
         public static array $dbs = [];
         private static PDO $current;
 
+        private static function _pdo_param_type(string $php_type) : int
+        {
+            return [
+                'integer' => PDO::PARAM_INT,
+                'string' => PDO::PARAM_STR,
+                'boolean' => PDO::PARAM_BOOL
+            ][$php_type];
+        }
+
+        public static function get_driver() : string
+        {
+            return self::$current->getAttribute(PDO::ATTR_DRIVER_NAME);
+        }
+
         /**
          * Connects to the project's database using dotenv settings
          */
@@ -47,9 +61,10 @@
             self::$current = self::$dbs['MAIN'];
         }
 
+
         public static function use(string $name) : void
         {
-            self::$current = self::$dbs[$name];
+            self::$current = self::$dbs[strtoupper($name)];
         }
 
         /**
@@ -61,7 +76,10 @@
          */
         public static function query(string $sql, array $params = []) : array {
             $stmt = self::$current->prepare($sql);
-            $stmt->execute($params ?? []);
+            foreach($params as $k => $v)
+                $stmt->bindValue(":$k", $v, self::_pdo_param_type(gettype($v)));
+            /* $stmt->execute($params ?? []); */
+            $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 

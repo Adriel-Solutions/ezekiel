@@ -144,11 +144,13 @@
         public function set_schema(array $schema) : void { $this->schema = $schema; }
         public function get_schema() : array { return $this->schema; }
 
-        public function set_relation($name, $relation) : void { $this->relations[$name] = $relation; }
+        public function set_relation(string $name, array $relation) : void { $this->relations[$name] = $relation; }
         public function as_records() : static { $this->is_record_asked = true; return $this; }
 
         public function get_primary_key() : string { return $this->primary_key; }
+
         public function get_database() : string { return $this->db; }
+        public function set_database(string $database) : void { $this->db = $database; }
 
         /**
          * Turn an array of $column => $value WHERE clauses
@@ -387,7 +389,7 @@
             $per_page = $params['per_page'];
             $page_shift = $per_page * ($params['page'] - 1);
 
-            return [ 'per_page' => $per_page , 'page_shift' => $page_shift ];
+            return [ 'per_page' => (int) $per_page , 'page_shift' => (int)$page_shift ];
         }
 
         /**
@@ -848,6 +850,7 @@
 
             $payload = $this->_normalize_payload($payload);
             $fields = array_keys($payload);
+            $primary_key = $this->primary_key;
 
             $parenthesis_str = join(', ', $fields);
             $values_str = join(
@@ -866,7 +869,6 @@
             );
 
             if ( self::$is_encryption_enabled ) {
-                $primary_key = $this->primary_key;
                 $parenthesis_str .= " , $primary_key" ;
                 $values_str .= ' , ' . $this->_build_encrypted_placeholder_str($primary_key);
                 $payload = array_merge($payload , [ $primary_key => UUID::v5() ]);
@@ -874,14 +876,26 @@
 
             $returned_columns = $this->_build_returned_columns_str();
 
-            $rows = Database::query(
-                "INSERT INTO $table
-                 ($parenthesis_str)
-                 VALUES
-                 ($values_str)
-                 RETURNING $returned_columns",
-                $payload
-            );
+            $query = "INSERT INTO $table
+                      ($parenthesis_str)
+                      VALUES
+                      ($values_str)";
+
+
+            if('pgsql' === Database::get_driver()) 
+            {
+                $query .= " RETURNING $returned_columns";
+                $rows = Database::query($query, $payload);
+            } 
+            elseif( 'mysql' === Database::get_driver() )
+            {
+                Database::query($query, $payload);
+                $rows = Database::query(
+                    "SELECT $returned_columns 
+                    FROM $table 
+                    WHERE $primary_key = LAST_INSERT_ID()"
+                );
+            }
 
             return $this->_output($rows[0]);
         }
@@ -906,16 +920,24 @@
 
             $returned_columns = $this->_build_returned_columns_str();
 
-            $rows = Database::query(
-                "UPDATE $table
-                 SET $set_str
-                 WHERE $primary_key = :id
-                 RETURNING $returned_columns",
-                 array_merge(
-                     [ 'id' => $id ],
-                     $set_payload
-                 )
-            );
+            $query = "UPDATE $table
+                      SET $set_str
+                      WHERE $primary_key = :id";
+
+            if('pgsql' === Database::get_driver()) 
+            {
+                $query .= " RETURNING $returned_columns";
+                $rows = Database::query($query, array_merge([ 'id' => $id ], $set_payload));
+            } 
+            elseif( 'mysql' === Database::get_driver() )
+            {
+                Database::query($query, array_merge([ 'id' => $id ], $set_payload));
+                $rows = Database::query(
+                    "SELECT $returned_columns 
+                     FROM $table 
+                     WHERE $primary_key = $id"
+                );
+            }
 
             return $this->_output($rows[0]);
         }
@@ -953,16 +975,24 @@
 
             $returned_columns = $this->_build_returned_columns_str();
 
-            $rows = Database::query(
-                "UPDATE $table
-                 SET $set_str
-                 $where_str
-                 RETURNING $returned_columns",
-                 array_merge(
-                     $where_payload,
-                     $set_payload
-                 )
-            );
+            $query = "UPDATE $table
+                      SET $set_str
+                      $where_str";
+
+            if('pgsql' === Database::get_driver()) {
+                $query .= " RETURNING $returned_columns";
+                $rows = Database::query($query, array_merge($where_payload, $set_payload));
+            }
+            elseif( 'mysql' === Database::get_driver() )
+            {
+                $rows = Database::query($query, array_merge($where_payload, $set_payload));
+                $rows = Database::query(
+                    "SELECT $returned_columns 
+                     FROM $table 
+                     $where_str",
+                     $where_payload
+                );
+            }
 
             return $this->_output($rows);
         }
