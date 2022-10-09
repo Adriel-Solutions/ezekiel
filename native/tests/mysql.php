@@ -9,7 +9,7 @@
     use native\libs\Database;
     use native\libs\Options;
 
-    final class ServiceTest extends TestCase
+    final class ServiceMySqlTest extends TestCase
     {
         private Service $s_parents;
         private Service $s_children;
@@ -22,99 +22,56 @@
             // Connect to database
             Database::load();
 
+            Database::use('hesk');
+
             // Set up tests structure
-            if(!Options::get('ENCRYPTION_ENABLED')) {
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_parents ( 
-                        pk INT GENERATED ALWAYS AS IDENTITY,
-                        name TEXT NOT NULL,
-                        age INT NOT NULL,
+            Database::query(
+                'CREATE TABLE IF NOT EXISTS tests_parents ( 
+                    pk INT AUTO_INCREMENT,
+                    name TEXT NOT NULL,
+                    age INT NOT NULL,
 
-                        PRIMARY KEY (pk)
-                    )'
-                );
+                    PRIMARY KEY (pk)
+                )'
+            );
 
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_children ( 
-                        pk INT GENERATED ALWAYS AS IDENTITY,
-                        name TEXT NOT NULL,
-                        age INT NOT NULL,
+            Database::query(
+                'CREATE TABLE IF NOT EXISTS tests_children ( 
+                    pk INT AUTO_INCREMENT,
+                    name TEXT NOT NULL,
+                    age INT NOT NULL,
 
-                        fk_parent_1 INT NOT NULL,
-                        fk_parent_2 INT NULL DEFAULT NULL,
+                    fk_parent_1 INT NOT NULL,
+                    fk_parent_2 INT NULL DEFAULT NULL,
 
-                        PRIMARY KEY (pk),
-                        FOREIGN KEY (fk_parent_1) REFERENCES tests_parents (pk),
-                        FOREIGN KEY (fk_parent_2) REFERENCES tests_parents (pk)
-                    )'
-                );
+                    PRIMARY KEY (pk),
+                    FOREIGN KEY (fk_parent_1) REFERENCES tests_parents (pk),
+                    FOREIGN KEY (fk_parent_2) REFERENCES tests_parents (pk)
+                )'
+            );
 
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_children_friends ( 
-                        pk INT GENERATED ALWAYS AS IDENTITY,
-                        fk_child_1 INT NOT NULL,
-                        fk_child_2 INT NOT NULL,
+            Database::query(
+                'CREATE TABLE IF NOT EXISTS tests_children_friends ( 
+                    pk INT AUTO_INCREMENT,
+                    fk_child_1 INT NOT NULL,
+                    fk_child_2 INT NOT NULL,
 
-                        PRIMARY KEY (pk),
-                        FOREIGN KEY (fk_child_1) REFERENCES tests_children (pk) ON DELETE CASCADE,
-                        FOREIGN KEY (fk_child_2) REFERENCES tests_children (pk) ON DELETE CASCADE
-                    )'
-                );
+                    PRIMARY KEY (pk),
+                    FOREIGN KEY (fk_child_1) REFERENCES tests_children (pk) ON DELETE CASCADE,
+                    FOREIGN KEY (fk_child_2) REFERENCES tests_children (pk) ON DELETE CASCADE
+                )'
+            );
 
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_pets ( 
-                        pk INT GENERATED ALWAYS AS IDENTITY,
-                        name TEXT NOT NULL,
-                        fk_child INT NOT NULL,
+            Database::query(
+                'CREATE TABLE IF NOT EXISTS tests_pets ( 
+                    pk INT AUTO_INCREMENT,
+                    name TEXT NOT NULL,
+                    fk_child INT NOT NULL,
 
-                        PRIMARY KEY (pk),
-                        FOREIGN KEY (fk_child) REFERENCES tests_children (pk) ON DELETE CASCADE
-                    )'
-                );
-            } else {
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_parents ( 
-                        pk BYTEA NOT NULL,
-                        name BYTEA NOT NULL,
-                        age BYTEA NOT NULL,
-
-                        PRIMARY KEY (pk)
-                    )'
-                );
-
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_children ( 
-                        pk BYTEA NOT NULL,
-                        name BYTEA NOT NULL,
-                        age BYTEA NOT NULL,
-
-                        fk_parent_1 BYTEA NOT NULL,
-                        fk_parent_2 BYTEA NULL DEFAULT NULL,
-
-                        PRIMARY KEY (pk)
-                    )'
-                );
-
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_children_friends ( 
-                        pk BYTEA,
-                        fk_child_1 BYTEA NOT NULL,
-                        fk_child_2 BYTEA NOT NULL,
-
-                        PRIMARY KEY (pk)
-                    )'
-                );
-
-                Database::query(
-                    'CREATE TABLE IF NOT EXISTS tests_pets ( 
-                        pk BYTEA NOT NULL,
-                        name BYTEA NOT NULL,
-                        fk_child BYTEA NOT NULL,
-
-                        PRIMARY KEY (pk)
-                    )'
-                );
-            }
+                    PRIMARY KEY (pk),
+                    FOREIGN KEY (fk_child) REFERENCES tests_children (pk) ON DELETE CASCADE
+                )'
+            );
         }
 
         protected function setUp() : void 
@@ -122,6 +79,7 @@
             // Setup services
             $this->s_parents = new Service();
             $this->s_parents->set_table('tests_parents');
+            $this->s_parents->set_database('hesk');
 
             $this->s_children = new Service();
             $this->s_children->set_table('tests_children');
@@ -129,52 +87,32 @@
             $this->s_children->set_relation('parent_2', [ 'type' => 'ONE-TO-ONE' , 'table' => 'tests_parents' , 'local_column' => 'fk_parent_2' ]);
             $this->s_children->set_relation('friends', [ 'type' => 'MANY-TO-MANY' , 'table' => 'tests_children' ,  'dictionary' => 'tests_children_friends' , 'local_column' => 'fk_child_1' , 'foreign_column' => 'fk_child_2' ]);
             $this->s_children->set_relation('pets', [ 'type' => 'MANY-TO-ONE' , 'table' => 'tests_pets' ,  'foreign_column' => 'fk_child' ]);
+            $this->s_children->set_database('hesk');
 
             // Fill with data
-            if(!Options::get('ENCRYPTION_ENABLED')) {
-                Database::query("DROP EXTENSION IF EXISTS pgcrypto;");
+            Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Joe' , 30  )");
+            Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Jane' , 34  )");
+            Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Paul' , 48  )");
 
-                Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Joe' , 30  )");
-                Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Jane' , 34  )");
-                Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Paul' , 48  )");
+            Database::query("INSERT INTO tests_children ( name , age , fk_parent_1 , fk_parent_2 ) VALUES ( 'Harry' , 2 , 1 , 2)");
+            Database::query("INSERT INTO tests_children ( name , age , fk_parent_1 , fk_parent_2 ) VALUES ( 'Ron' , 4 , 1 , 2)");
+            Database::query("INSERT INTO tests_children ( name , age , fk_parent_1 ) VALUES ( 'Emma' , 4 , 1 )");
 
-                Database::query("INSERT INTO tests_children ( name , age , fk_parent_1 , fk_parent_2 ) VALUES ( 'Harry' , 2 , 1 , 2)");
-                Database::query("INSERT INTO tests_children ( name , age , fk_parent_1 , fk_parent_2 ) VALUES ( 'Ron' , 4 , 1 , 2)");
-                Database::query("INSERT INTO tests_children ( name , age , fk_parent_1 ) VALUES ( 'Emma' , 4 , 1 )");
+            Database::query("INSERT INTO tests_children_friends ( fk_child_1, fk_child_2 ) VALUES ( 1 , 2 )");
+            Database::query("INSERT INTO tests_children_friends ( fk_child_1, fk_child_2 ) VALUES ( 1 , 3 )");
 
-                Database::query("INSERT INTO tests_children_friends ( fk_child_1, fk_child_2 ) VALUES ( 1 , 2 )");
-                Database::query("INSERT INTO tests_children_friends ( fk_child_1, fk_child_2 ) VALUES ( 1 , 3 )");
-
-                Database::query("INSERT INTO tests_pets ( name , fk_child ) VALUES ( 'Dogo' , 1 )");
-                Database::query("INSERT INTO tests_pets ( name , fk_child ) VALUES ( 'Dugu' , 1 )");
-            } else {
-                $key = Options::get('ENCRYPTION_KEY');
-
-                Database::query("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
-
-                Database::query("INSERT INTO tests_parents ( pk , name , age ) VALUES ( pgp_sym_encrypt( 1::text , '$key' ), pgp_sym_encrypt( 'Joe'  , '$key'  ), pgp_sym_encrypt( 30::text , '$key' ) )");
-                Database::query("INSERT INTO tests_parents ( pk , name , age ) VALUES ( pgp_sym_encrypt( 2::text , '$key' ), pgp_sym_encrypt( 'Jane' , '$key'  ), pgp_sym_encrypt( 34::text , '$key' ) )");
-                Database::query("INSERT INTO tests_parents ( pk , name , age ) VALUES ( pgp_sym_encrypt( 3::text , '$key' ), pgp_sym_encrypt( 'Paul' , '$key'  ), pgp_sym_encrypt( 48::text , '$key' ) )");
-
-                Database::query("INSERT INTO tests_children ( pk , name , age , fk_parent_1 , fk_parent_2 ) VALUES ( pgp_sym_encrypt( 1::text , '$key' ), pgp_sym_encrypt( 'Harry' , '$key' ), pgp_sym_encrypt( 2::text , '$key' ) , pgp_sym_encrypt( 1::text , '$key' ) , pgp_sym_encrypt( 2::text , '$key' ))");
-                Database::query("INSERT INTO tests_children ( pk , name , age , fk_parent_1 , fk_parent_2 ) VALUES ( pgp_sym_encrypt( 2::text , '$key' ), pgp_sym_encrypt( 'Ron' , '$key' ), pgp_sym_encrypt( 4::text , '$key' ) , pgp_sym_encrypt( 1::text , '$key' ) , pgp_sym_encrypt( 2::text , '$key' ))");
-                Database::query("INSERT INTO tests_children ( pk , name , age , fk_parent_1 ) VALUES ( pgp_sym_encrypt( 3::text , '$key' ), pgp_sym_encrypt( 'Emma' , '$key' ), pgp_sym_encrypt( 4::text , '$key' ) , pgp_sym_encrypt( 1::text , '$key' ) )");
-
-                Database::query("INSERT INTO tests_children_friends ( pk , fk_child_1, fk_child_2 ) VALUES ( pgp_sym_encrypt( 1::text , '$key' ), pgp_sym_encrypt( 1::text , '$key' ) , pgp_sym_encrypt( 2::text , '$key' ) )");
-                Database::query("INSERT INTO tests_children_friends ( pk , fk_child_1, fk_child_2 ) VALUES ( pgp_sym_encrypt( 2::text , '$key' ), pgp_sym_encrypt( 1::text , '$key' ) , pgp_sym_encrypt( 3::text , '$key' ) )");
-
-                Database::query("INSERT INTO tests_pets ( pk , name , fk_child ) VALUES ( pgp_sym_encrypt( 1::text , '$key' ), pgp_sym_encrypt( 'Dogo' , '$key' ), pgp_sym_encrypt( 1::text , '$key' ) )");
-                Database::query("INSERT INTO tests_pets ( pk , name , fk_child ) VALUES ( pgp_sym_encrypt( 2::text , '$key' ), pgp_sym_encrypt( 'Dugu' , '$key' ), pgp_sym_encrypt( 1::text , '$key' ) )");
-            }
+            Database::query("INSERT INTO tests_pets ( name , fk_child ) VALUES ( 'Dogo' , 1 )");
+            Database::query("INSERT INTO tests_pets ( name , fk_child ) VALUES ( 'Dugu' , 1 )");
         }
 
         protected function tearDown() : void 
         {
             // Clear tables
-            Database::query("TRUNCATE tests_pets RESTART IDENTITY CASCADE");
-            Database::query("TRUNCATE tests_children_friends RESTART IDENTITY CASCADE");
-            Database::query("TRUNCATE tests_children RESTART IDENTITY CASCADE");
-            Database::query("TRUNCATE tests_parents RESTART IDENTITY CASCADE");
+            Database::query("SET FOREIGN_KEY_CHECKS = 0");
+            Database::query("TRUNCATE tests_pets");
+            Database::query("TRUNCATE tests_children_friends");
+            Database::query("TRUNCATE tests_children");
+            Database::query("TRUNCATE tests_parents");
         }
 
         public static function tearDownAfterClass() : void 
@@ -674,3 +612,4 @@
             );
         }
     }
+

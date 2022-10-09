@@ -60,7 +60,6 @@
     function HMP($module, $key, $params = []) {
         Render::module_partial($module, $key, $params);
     }
-
     function HL($key, $params = []) {
         Render::layout($key, $params);
     }
@@ -261,4 +260,12 @@
         $s = new Service();
         $s->set_table($table);
         return $s;
+    }
+
+    /**
+     * Determine whether UI is installed or not
+     */
+    function is_enabled_ui() : bool
+    {
+        return file_exists(DIR_NATIVE . DIRECTORY_SEPARATOR . 'views/components');
     }
