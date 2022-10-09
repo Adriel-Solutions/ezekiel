@@ -36,7 +36,7 @@
     /**
      * PHP Logging
      */
-    if(Options::get('MODE') === 'DEBUG') {
+    if('DEBUG' === Options::get('MODE')) {
         error_reporting(E_ALL);
         ini_set('ignore_repeated_errors', TRUE);
         ini_set('display_errors', TRUE);
@@ -48,6 +48,15 @@
         ini_set('display_errors', FALSE);
         ini_set('log_errors', TRUE);
         ini_set('error_log', DIR_ROOT . '/storage/logs/php/error.log');
+    }
+
+    /**
+     * Pretty Debug
+     */
+    if('DEBUG' === Options::get('MODE')) {
+        $whoops = new \Whoops\Run;
+        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+        $whoops->register();
     }
 
     /**
