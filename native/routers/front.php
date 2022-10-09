@@ -12,30 +12,39 @@
 
             // Default not-found handler
             $this->use(function($req, $res, &$next) {
-                $res->render([
-                    'view' => '/pages/errors/404'
-                ]);
+                if(is_enabled_ui())
+                    $res->render([
+                        'view' => '/pages/errors/404'
+                    ]);
+                else
+                    $res->abort(404);
+
                 $next = false;
             });
 
             // Default error handler
             $this->set_error_handler(function($req, $res, &$next, $error) {
-                if('DEBUG' !== Options::get('MODE')) {
-                    error_log($error);
-
-                    $res->render([
-                        'view' => '/pages/errors/500',
-                    ]);
+                if('DEBUG' === Options::get('MODE')) {
+                    $whoops = new \Whoops\Run;
+                    $whoops->allowQuit(false);
+                    $whoops->writeToOutput(false);
+                    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                    $html = $whoops->handleException($error);
+                    $res->raw([ 'content' => $html ]);
                     $next = false;
                     return;
                 }
 
-                $whoops = new \Whoops\Run;
-                $whoops->allowQuit(false);
-                $whoops->writeToOutput(false);
-                $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-                $html = $whoops->handleException($error);
-                $res->raw([ 'content' => $html ]);
+                error_log($error);
+
+                if(is_enabled_ui())
+                    $res->render([
+                        'view' => '/pages/errors/500',
+                    ]);
+                else
+                    $res->abort(500);
+
+                $next = false;
             });
         }
     }
