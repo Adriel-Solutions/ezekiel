@@ -188,7 +188,7 @@
 
             // Output-related
             $use_native_skeletons = !isset($params['use_native_skeletons']) ? true : $params['use_native_skeletons'];
-            $use_native_views = !isset($params['use_native_views']) ? true : $params['use_native_views'];
+            $use_native_views = !isset($params['use_native_views']) ? false : $params['use_native_views'];
             $view = 'index';
             if(!empty($params['view']));
                 $view = $params['view'];

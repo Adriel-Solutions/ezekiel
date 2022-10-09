@@ -14,7 +14,8 @@
             $this->use(function($req, $res, &$next) {
                 if(is_enabled_ui())
                     $res->render([
-                        'view' => '/pages/errors/404'
+                        'view' => '/pages/errors/404',
+                        'use_native_views' => true
                     ]);
                 else
                     $res->abort(404);
@@ -40,6 +41,7 @@
                 if(is_enabled_ui())
                     $res->render([
                         'view' => '/pages/errors/500',
+                        'use_native_views' => true
                     ]);
                 else
                     $res->abort(500);
