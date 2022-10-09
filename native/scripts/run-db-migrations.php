@@ -104,10 +104,10 @@
     foreach($migrations as $m) {
         $command = sprintf(
             $sql_base,
-            Options::get('DB_PASS'),
-            Options::get('DB_USER'),
-            Options::get('DB_HOST'),
-            Options::get('DB_NAME'),
+            Options::get('DB_MAIN_PASS'),
+            Options::get('DB_MAIN_USER'),
+            Options::get('DB_MAIN_HOST'),
+            Options::get('DB_MAIN_NAME'),
             "$m"
         );
 
