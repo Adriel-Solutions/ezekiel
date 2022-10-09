@@ -245,6 +245,17 @@
             $this->call_finish_handler();
         }
 
+        public function abort(int $code) {
+            if($this->_is_sent) return;
+
+            http_response_code($code);
+
+            $this->_is_sent = true;
+
+            $this->call_finish_handler();
+        }
+
+
         /**
          * Handy HTTP Success response alias
          */
