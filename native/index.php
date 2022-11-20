@@ -26,7 +26,7 @@
     use \native\libs\Router;
     use \native\libs\Database;
     use \native\libs\I18n;
-    use native\libs\Logger;
+    use \native\libs\Logger;
 
     /**
      * Project configuration
@@ -51,15 +51,6 @@
     }
 
     /**
-     * Pretty Debug
-     */
-    if('DEBUG' === Options::get('MODE')) {
-        $whoops = new \Whoops\Run;
-        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-        $whoops->register();
-    }
-
-    /**
      * Database connection
     */
     Database::load();
@@ -74,6 +65,11 @@
      * I18n initialization
      */
     I18n::load();
+
+    /**
+     * Timezone setup for dates
+     */
+    date_default_timezone_set(Options::get('TIMEZONE'));
 
     /**
      * Log initialization

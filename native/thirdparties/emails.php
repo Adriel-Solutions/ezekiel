@@ -13,7 +13,7 @@
         public function render_from_module(string $module, string $key, array $params = []) : string
         {
             ob_start();
-            include __DIR__ . "/../../app/modules/" . $module . "/views/emails" . $key . ".php";
+            include DIR_APP . "/modules/" . $module . "/views/emails" . $key . ".php";
             $output = ob_get_clean();
             return $output;
         }
@@ -21,7 +21,7 @@
         public function render(string $key, array $params = []) : string
         {
             ob_start();
-            include __DIR__ . "/../../app/views/emails" . $key . ".php";
+            include DIR_APP . '/views/emails' . $key . '.php';
             $output = ob_get_clean();
             return $output;
         }
@@ -58,7 +58,13 @@
 
                 $mail->addAddress($params['to']);
 
-                $mail->Subject = $params['subject'];
+                if(!empty($params['subject']))
+                    $mail->Subject = $params['subject'];
+                else {
+                    preg_match("/\<title\>(.+)\<\/title\>/m", $params['body'], $matches);
+                    $mail->Subject = $matches[1];
+                }
+
                 $mail->Body = $params['body'];
                 $mail->CharSet = 'UTF-8';
 

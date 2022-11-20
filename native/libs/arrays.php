@@ -136,4 +136,9 @@
                 array_column($arr, $column_value),
             );
         }
+
+        public static function flatten(array $arr) : array
+        {
+            return array_merge(...$arr);
+        }
     }

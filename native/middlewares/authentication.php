@@ -3,7 +3,9 @@
     namespace native\middlewares;
 
     use native\libs\Middleware;
-    use native\libs\Service;
+use native\libs\Request;
+use native\libs\Response;
+use native\libs\Service;
 
     class Authentication extends Middleware {
         // Type of authentication 
@@ -40,9 +42,8 @@
             }
         }
 
-        public function __invoke($req, $res, &$next) {
-            $service = new Service();
-            $service->set_table($this->table);
+        public function __invoke(Request $req, Response $res, &$next) {
+            $service = default_service($this->table);
 
             // Mechanism : Session
             if('session' === strtolower($this->type)) {
@@ -59,7 +60,33 @@
                 }
 
                 $user_id = $req->session->get('user_id');
+
+                if(!$service->exists($user_id)) {
+                    $req->session->unset('logged');
+                    $req->session->unset('user_id');
+
+                    if('front' === strtolower($this->for))
+                        return $res->redirect(front_path('/sign-in'));
+
+                    if('api' === strtolower($this->for))
+                        return $res->send_unauthorized();
+                }
+
                 $user = $service->get($user_id);
+
+                if(
+                    (isset($user['is_activated']) && !$user['is_activated'])
+                    || ((isset($user['is_deleted'])) && $user['is_deleted'])
+                ) {
+                    $req->session->unset('logged');
+                    $req->session->unset('user_id');
+
+                    if('front' === strtolower($this->for))
+                        return $res->redirect(front_path('/sign-in'));
+
+                    if('api' === strtolower($this->for))
+                        return $res->send_unauthorized();
+                }
 
                 $req->context['user'] = $user;
 

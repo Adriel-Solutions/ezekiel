@@ -19,7 +19,7 @@
         public function get_database() { return $this->db; }
         public function get_primary_key() { return $this->primary_key; }
 
-        private static function call_base_service($function, &...$arguments) : mixed
+        protected static function call_base_service($function, &...$arguments) : mixed
         {
             $service = new BaseService(new static());
             return $service->$function(...$arguments);
@@ -55,9 +55,9 @@
         {
             return self::call_base_service('get_count');
         }
-        public static function find_one(array $conditions, bool $is_strict = true) : array|Record
+        public static function find_one(array $conditions, array $page_parameters = [], bool $is_strict = true) : array|Record
         {
-            return self::call_base_service('find_one', $conditions, $is_strict);
+            return self::call_base_service('find_one', $conditions, $page_parameters, $is_strict);
         }
         public static function find_many(array $conditions, array $page_parameters = []) : array|Records
         {
@@ -102,6 +102,10 @@
         public static function pluck(string $column, array $conditions = [], array $page_parameters = []) : array
         {
             return self::call_base_service('pluck', $column, $conditions, $page_parameters);
+        }
+        public static function query(string $sql, array $payload = []) : array|Record|Records
+        {
+            return self::call_base_service('query', $sql, $payload);
         }
 
     }

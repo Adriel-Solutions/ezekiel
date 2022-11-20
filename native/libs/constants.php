@@ -25,6 +25,9 @@
         public static int $HTTP_CONFLICT_CODE = 409;
         public static string $HTTP_CONFLICT_STATUS = 'Conflict';
 
+        public static int $HTTP_TOOMANYREQUESTS_CODE = 429;
+        public static string $HTTP_TOOMANYREQUESTS_STATUS = 'Too many requests';
+
         public static int $HTTP_ERROR_CODE = 500;
         public static string $HTTP_ERROR_STATUS = 'Failure';
 

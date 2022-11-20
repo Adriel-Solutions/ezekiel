@@ -94,7 +94,7 @@
         $class = $job['class'];
         $instance = new $class($job['pk']);
 
-        $context = json_decode($job['context'], true);
+        $context = json_decode($job['context'] ?? '{}', true);
         $report = 'The job executed succesfully';
 
         try {

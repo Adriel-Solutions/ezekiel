@@ -9,23 +9,16 @@
     class Adapter {
 
         // List of aliases ( a -> b )
-        protected array $mappers;
+        protected array $mappers = [];
 
         // List of exclusions ( a -> a disappears )
-        protected array $excluders;
+        protected array $excluders = [];
 
         // List of dynamic values ( a -> function of the object that's got a )
-        protected array $computers;
+        protected array $computers = [];
 
         // Each of these is organized by namespace
         // In other words, a name is associated with every mapper / excluder / computer
-
-        // Constructor - Initialize all the internal modifiers
-        public function __construct() { 
-            $this->mappers = [];
-            $this->excluders = [];
-            $this->computers = [];
-        }
 
         /**
          * Applies mappers, excluders, and computers to an object

@@ -1,0 +1,20 @@
+[x-cloak] {
+  display: none !important;
+}
+form.rounded-none input,
+form.rounded-none select,
+form.rounded-none button {
+  border-radius: 0 !important;
+}
+
+html {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}

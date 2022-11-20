@@ -2,6 +2,8 @@
 
     namespace native\libs;
 
+    use native\libs\Service;
+
     /**
      * Assumption made : Only purpose -> Quick and easy edit of a row in database
      *                   No need for population (yet ?!)
@@ -21,7 +23,7 @@
 
         public function delete() {
             $this->service->delete($this->data['pk']);
-            $this->data = null;
+            $this->data = [];
         }
 
         public function set($payload) {

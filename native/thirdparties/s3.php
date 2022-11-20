@@ -7,13 +7,13 @@
     use Throwable;
 
     class S3 extends Thirdparty {
-        private $client;
+        private static \Aws\S3\S3Client $client;
 
-        private function setup_client() : void
+        private static function setup_client() : void
         {
-            if(!empty($this->client)) return;
+            if(!empty(self::$client)) return;
 
-            $this->client = new \Aws\S3\S3Client([
+            self::$client = new \Aws\S3\S3Client([
                 'version' => 'latest',
                 'region'  => Options::get('STORAGE_S3_REGION'),
                 'endpoint' => Options::get('STORAGE_S3_HOST'),
@@ -30,12 +30,12 @@
          * @param {$_FILE} $file : The raw content to store
          * @return {boolean} TRUE if storing the file worked, FALSE otherwise
          */
-        public function store($name, $content) : bool
+        public static function store($name, $content) : bool
         {
-            $this->setup_client();
+            self::setup_client();
 
             try {
-                $this->client->putObject([
+                self::$client->putObject([
                     'Bucket' => Options::get('STORAGE_S3_BUCKET'),
                     'Key'    => $name,
                     'Body'   => $content
@@ -53,15 +53,15 @@
          * @param {string} $name : The name of the file to read
          * @return {string} The content of the file
          */
-        public function get($name) : string
+        public static function get(string $filename) : string
         {
-            $this->setup_client();
+            self::setup_client();
             $content = null;
 
             try {
-                $content = $this->client->getObject([
+                $content = self::$client->getObject([
                     'Bucket' => Options::get('STORAGE_S3_BUCKET'),
-                    'Key'    => $name,
+                    'Key'    => $filename,
                 ]);
             } catch (Throwable $e) {
                 /* throw $e; */
@@ -71,17 +71,23 @@
             return (string) $content['Body'];
         }
 
+        public static function exists(string $filename) : bool
+        {
+            self::setup_client();
+            return self::$client->doesObjectExist(Options::get('STORAGE_S3_BUCKET'), $filename);
+        }
+
         /**
          * @return {boolean} TRUE if erasing the file worked, FALSE otherwise
          */
-        public function erase($name) : bool
+        public static function erase(string $filename) : bool
         {
-            $this->setup_client();
+            self::setup_client();
 
             try {
-                $this->client->deleteObject([
+                self::$client->deleteObject([
                     'Bucket' => Options::get('STORAGE_S3_BUCKET'),
-                    'Key'    => $name,
+                    'Key'    => $filename,
                 ]);
             } catch (Throwable $e) {
                 /* throw $e; */
@@ -91,7 +97,29 @@
             return true;
         }
 
-        /**
-         * @TODO Generate download / upload link
-         */
+        public static function create_presigned_url_download(string $filename) : string
+        {
+            self::setup_client();
+
+            $command = self::$client->getCommand('GetObject', [
+                'Bucket' => Options::get('STORAGE_S3_BUCKET'),
+                'Key'    => $filename
+            ]);
+
+            $request = self::$client->createPresignedRequest($command, Options::get('STORAGE_S3_DEFAULT_DOWNLOAD_TIME'));
+            return (string) $request->getUri();
+        }
+
+        public static function create_presigned_url_upload(string $filename) : string
+        {
+            self::setup_client();
+
+            $command = self::$client->getCommand('PutObject', [
+                'Bucket' => Options::get('STORAGE_S3_BUCKET'),
+                'Key'    => $filename
+            ]);
+
+            $request = self::$client->createPresignedRequest($command, Options::get('STORAGE_S3_DEFAULT_UPLOAD_TIME'));
+            return (string) $request->getUri();
+        }
     }

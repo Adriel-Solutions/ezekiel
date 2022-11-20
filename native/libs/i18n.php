@@ -75,4 +75,8 @@
         public static function get_supported_locales() {
             return self::$supported_locales;
         }
+
+        public static function get_active_locale() {
+            return self::$active_locale;
+        }
     }

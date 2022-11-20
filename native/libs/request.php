@@ -1,6 +1,8 @@
 <?php
     namespace native\libs;
 
+    use native\libs\Session;
+
     /**
      * This internal library is responsible for representing an HTTP request
      * in the project. It comes handy when dealing with headers, body, IP, and 
@@ -43,7 +45,7 @@
 
         // An alias for $_SESSION
         // Mostly used for view-rendering purpose
-        public $session;
+        public Session $session;
 
         // A state for the request, meant to hold data for working across multiple
         // controllers and middlewares. This is useful, for instance, for storing

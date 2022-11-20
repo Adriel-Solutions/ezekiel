@@ -29,7 +29,7 @@
                 $extracts = [];
 
                 // Try to match the pattern KEY="VALUE"
-                preg_match('/([a-zA-Z_]+)="([^"]+)"/', $line, $extracts);
+                preg_match('/([0-9a-zA-Z_]+)="([^"]+)"/', $line, $extracts);
 
                 // If unmatched, skip the line
                 if(empty($extracts)) continue;

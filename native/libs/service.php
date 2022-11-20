@@ -166,9 +166,28 @@
             foreach($conditions as $k => $v) {
                 $new_conditions[] = [
                     'column' => $k,
-                    'operator' => is_array($v) ? 'IN' : '=',
+                    'operator' => is_array($v) ? 'IN' : (is_null($v) ? 'IS' : '='),
                     'value' => $v
                 ];
+            }
+
+            return $new_conditions;
+        }
+
+        protected function _normalize_conditions_values(array $conditions) : array {
+            $new_conditions = [  ];
+
+            foreach($conditions as $c) {
+                if(!is_null($c['value'])) { 
+                    $new_conditions[] = $c;
+                    continue;
+                }
+
+                $c['value'] = '[NULL]';
+
+                    /* $c['operator'] = 'IS'; */
+
+                $new_conditions[] = $c;
             }
 
             return $new_conditions;
@@ -177,6 +196,7 @@
         /**
          * Apply extra treatment on user-supplied values before inserting/updating rows
          * At the moment, that is used only to turn booleans into 1s and 0s
+         * At the moment, that is used only to turn nulls into "[NULL]" for further treatment
          */
         protected function _normalize_payload(array $payload) : array {
             if ( empty($payload) ) return [];
@@ -192,6 +212,9 @@
                 if ( $v === true )
                     $new_value = 1;
 
+                if ( is_null($v) )
+                    $new_value = '[NULL]';
+
                 $new_payload[$k] = $new_value;
             }
 
@@ -200,7 +223,7 @@
 
         /**
          * Generates 'alias' key-value in conditions schema when two
-         * columns have the same name and could collide
+         * columns have the same name and could collide, or when using raw sql commands
          * Assumption : supplied $conditions are already normalized
          */
         protected function _auto_alias(array $conditions) : array {
@@ -227,6 +250,15 @@
                 $columns[$c['column']] += 1;
                 $new_condition['alias'] = $c['column'] . '_' . $columns[$c['column']];
                 $new_conditions[] = $new_condition;
+            }
+
+            // Raw SQL -> alias
+            $idx = 0;
+            foreach($new_conditions as &$nc) {
+                if(!str_starts_with($nc['column'], '['))
+                    continue;
+
+                $nc['alias'] = 'computed_value_' . $idx++;
             }
 
             return $new_conditions;
@@ -257,6 +289,7 @@
             // If conditions are not expressed as an array of arrays, normalize them
             // [ $key => $value ] becomes the format described in the documentation
             $conditions = $this->_normalize_conditions($conditions);
+            $conditions = $this->_normalize_conditions_values($conditions);
             $conditions = $this->_auto_alias($conditions);
 
             // Process the conditions
@@ -375,6 +408,51 @@
             return $set_str;
         }
 
+        protected function _build_insert_values_str($payload, $placeholder_prefix = '') : string
+        {
+            $base = '  ';
+            $fields_strs = [];
+
+            foreach($payload as $k => $v) {
+                $f_str = "";
+
+                $placeholder = null;
+
+                // Value = [SQL_STUFF]
+                if(str_starts_with($v, '['))
+                    $placeholder = str_replace([ '[' , ']' ], '', $v);
+                // Value = Literal
+                else {
+                    $placeholder .= ' :' ;
+
+                    if ( !empty($placeholder_prefix) )
+                        $k = $placeholder_prefix . $k;
+
+                    // table.column
+                    if( str_contains($k, '.') )
+                        $placeholder .= str_replace('.', '_', $k);
+                    else
+                        $placeholder .= $k;
+                }
+
+                // Intentional SQL cast to text
+                if ( self::$is_encryption_enabled )
+                    // Value = [SQL_STUFF]
+                    if ( str_starts_with($v, '[') )
+                        throw new Exception('SQL expressions are not supported when encryption is enabled');
+                    // Value = Literal
+                    else
+                        $f_str .= $this->_build_encrypted_column_str("$placeholder::text");
+                else
+                    $f_str .= $placeholder;
+
+                $fields_strs[] = $f_str;
+            }
+
+            $insert_values_str = $base . join(',', $fields_strs);
+            return $insert_values_str;
+        }
+
         protected function _build_page_str(array $params = []) : string {
             if(empty($params['per_page']) || empty($params['page']))
                 return "";
@@ -408,6 +486,7 @@
             // If conditions are not expressed as an array of arrays, normalize them
             // [ $key => $value ] becomes the format described in the documentation
             $conditions = $this->_normalize_conditions($conditions);
+            $conditions = $this->_normalize_conditions_values($conditions);
             $conditions = $this->_auto_alias($conditions);
 
             foreach($conditions as $c) {
@@ -730,7 +809,7 @@
          *
          * @return {array} The first matched record
          */
-        public function find_one(array $conditions, bool $is_strict = true) : array|Record 
+        public function find_one(array $conditions, array $page_parameters = [], bool $is_strict = true) : array|Record 
         {
             Database::use($this->db);
             $table = $this->_determine_table_for('read');
@@ -738,10 +817,12 @@
             $where_str = $this->_build_where_str($conditions, $is_strict);
             $where_payload = $this->_build_query_payload($conditions);
 
+            $order_str = $this->_build_order_str($page_parameters);
+
             $returned_columns = $this->_build_returned_columns_str();
 
             $rows = Database::query(
-                "SELECT $returned_columns FROM $table $where_str LIMIT 1",
+                "SELECT $returned_columns FROM $table $where_str $order_str LIMIT 1",
                 $where_payload
             );
 
@@ -849,24 +930,12 @@
             $table = $this->_determine_table_for('write');
 
             $payload = $this->_normalize_payload($payload);
+
             $fields = array_keys($payload);
             $primary_key = $this->primary_key;
 
             $parenthesis_str = join(', ', $fields);
-            $values_str = join(
-                ', ',
-                array_map(
-                    function ($field) {
-                        // Database encryption enabled
-                        if ( self::$is_encryption_enabled )
-                            return $this->_build_encrypted_placeholder_str($field);
-                        // Normal query
-                        else
-                            return ':' . $field;
-                    },
-                    $fields
-                )
-            );
+            $values_str = $this->_build_insert_values_str($payload);
 
             if ( self::$is_encryption_enabled ) {
                 $parenthesis_str .= " , $primary_key" ;
@@ -881,15 +950,20 @@
                       VALUES
                       ($values_str)";
 
+            $new_payload = [];
+            foreach($payload as $k => $v) {
+                if(str_starts_with($v,'[')) continue;
+                else $new_payload[$k] = $v;
+            }
 
             if('pgsql' === Database::get_driver()) 
             {
                 $query .= " RETURNING $returned_columns";
-                $rows = Database::query($query, $payload);
+                $rows = Database::query($query, $new_payload);
             } 
             elseif( 'mysql' === Database::get_driver() )
             {
-                Database::query($query, $payload);
+                Database::query($query, $new_payload);
                 $rows = Database::query(
                     "SELECT $returned_columns 
                     FROM $table 
@@ -911,6 +985,8 @@
         {
             Database::use($this->db);
             $table = $this->_determine_table_for('write');
+
+            $payload = $this->_normalize_payload($payload);
 
             $primary_key = $this->_get_primary_key();
 
@@ -966,6 +1042,8 @@
             Database::use($this->db);
             $table = $this->_determine_table_for('write');
 
+            $payload = $this->_normalize_payload($payload);
+
             $where_str = $this->_build_where_str($conditions);
             $where_payload = $this->_build_query_payload($conditions);
 
@@ -1015,8 +1093,6 @@
 
         /**
          * Populates a relational field within a given entry
-         * Assumption made : Pagination isn't supposed to be made here as listing UIs should query
-         *                   the children elements, and not try to load the main, and populate it
          *
          * @param {&array} $object The entry to populate the relation of, in place
          * @param {string} $field The name of the relation to populate
@@ -1115,12 +1191,14 @@
 
                     $returned_columns = $this->_build_returned_columns_str($foreign_table);
 
+                    $order_str = $this->_build_order_str($page_parameters);
+
                     $rows = Database::query(
-                        "SELECT $returned_columns FROM $foreign_table $where_str ",
+                        "SELECT $returned_columns FROM $foreign_table $where_str $order_str",
                         $where_payload
                     );
 
-                    $object[$field] = $rows;
+                    $object[$field] = empty($rows) ? [] : $rows;
                 break;
 
                 // N-N
@@ -1183,5 +1261,12 @@
         {
             foreach($objects as &$object)
                 $this->populate($object, $field, $conditions, $page_parameters);
+        }
+
+        public function query(string $sql, array $payload = []) : array|Record|Records
+        {
+            Database::use($this->db);
+            $rows = Database::query($sql, $payload);
+            return $this->_output($rows);
         }
     }

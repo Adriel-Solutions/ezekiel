@@ -29,24 +29,31 @@
         }
 
         public function __invoke($req, $res, &$next) {
-            $id = $req->params[0];
-
             // Good Case 1 : Encryption enabled -> No test can be done, ids are UUIDs
             // Potential @TODO : Test UUID format
             if(Options::get('ENCRYPTION_ENABLED') === true)
                 return;
 
-            // Good Case 2 : Encryption disabled -> ids must be integers
-            if(is_numeric($id))
-                return;
+            $keys = array_keys($req->params);
+            $keys = array_filter($keys, fn($k) => str_contains($k, 'id'));
 
-            // Wrong Case ->
-            if('front' === strtolower($this->for))  
-                $res->redirect($this->fallback);
-            elseif('api' === strtolower($this->for))
-                $res->send_malformed();
+            foreach($keys as $k) {
+                $id = $req->params[$k];
 
-            $next = false;
+                // Good Case 2 : Encryption disabled -> ids must be integers
+                if(is_numeric($id))
+                    continue;
+
+                // Wrong Case ->
+                if('front' === strtolower($this->for))  
+                    $res->redirect($this->fallback);
+                elseif('api' === strtolower($this->for))
+                    $res->send_malformed();
+
+                $next = false;
+                break;
+            }
+
         }
     }
 

@@ -4,12 +4,14 @@
     use native\libs\I18n;
     use native\libs\Router;
     use native\libs\Adapter;
+    use native\libs\Arrays;
     use native\libs\Service;
     use native\libs\Middleware;
     use native\libs\Controller;
     use native\libs\Job;
     use native\libs\Thirdparty;
     use native\libs\Constants;
+    use native\libs\Hooks;
     use native\libs\Module;
 
     function vd(mixed ...$x) : void
@@ -47,17 +49,31 @@
     function HC($key, $params = []) {
         Render::component($key, $params);
     }
-    function HNC($key, $params = []) {
+    function HNC($key, $params = [], $return = false) {
+        if($return) {
+            ob_start();
+            Render::native_component($key, $params);
+            return ob_get_clean();
+        }
         Render::native_component($key, $params);
     }
-
+    function RHNC($key, $params = []) : string {
+        ob_start();
+        Render::native_component($key, $params);
+        return ob_get_clean();
+    }
     function HP($key, $params = []) {
         Render::partial($key, $params);
     }
     function HNP($key, $params = []) {
         Render::native_partial($key, $params);
     }
-    function HMP($module, $key, $params = []) {
+    function HMP($module, $key, $params = [], $return = false) {
+        if($return) {
+            ob_start();
+            Render::module_partial($module, $key, $params);
+            return ob_get_clean();
+        }
         Render::module_partial($module, $key, $params);
     }
     function HL($key, $params = []) {
@@ -70,11 +86,23 @@
     /**
      * Practical path generators
      */
+    function api_path(string $path) : string {
+        return Options::get('ROOT_API') . $path;
+    }
+
     function front_path(string $path) : string {
         return Options::get('ROOT_FRONT') . $path;
     }
 
+    function webhooks_path(string $path) : string
+    {
+        return Options::get('ROOT_WEBHOOKS') . $path;
+    }
+
     function front_upload_path(string $path) : string {
+        if(Options::get('STORAGE_S3_HOST'))
+            return \native\thirdparties\S3::create_presigned_url_download($path);
+
         return Options::get('ROOT_ASSETS') . '/' . Options::get('UPLOADS_DIR') . '/' . $path ;
     }
 
@@ -103,13 +131,20 @@
     function front_module_asset_path(string $module, string $path) : string {
         return 
             Options::get('ROOT_MODULES_ASSETS') 
-            . '/' . $module . '/'
+            . '/' . $module
             . $path 
             . (
                 ( Options::get('MODE')  === 'PRODUCTION' )
                 ? '?v=' . Options::get('ASSETS_VERSION') 
                 : '' 
             );
+    }
+
+    function absolute_url(string $path) : string
+    {
+        return
+            Options::get('ROOT_URL')
+            . $path;
     }
 
     /**
@@ -126,7 +161,7 @@
      * @return {string} The sanitized string
      */
     function sanitize_before_output(?string $str) : string {
-        if(empty($str)) return "";
+        if(!isset($str)) return "";
         return htmlentities($str, ENT_QUOTES | ENT_HTML5);
     }
 
@@ -147,8 +182,13 @@
     /**
      * Simple and handy alias for sanitize_before_output()
      */
-    function _e(?string $str) : string {
-        return sanitize_before_output($str);
+    function _e(string|array|null $var) : string|array {
+        if(empty($var))
+            return "";
+
+        if(is_array($var))
+            return array_map(fn($v) => sanitize_before_output($v), $var);
+        return sanitize_before_output($var);
     }
 
     /**
@@ -167,6 +207,11 @@
     function get_locales() : array 
     {
         return I18n::get_supported_locales();
+    }
+
+    function fire_hook(string $signal, mixed &$params = null) : void 
+    {
+        Hooks::fire($signal, $params);
     }
 
     /**
@@ -268,4 +313,29 @@
     function is_enabled_ui() : bool
     {
         return file_exists(DIR_NATIVE . DIRECTORY_SEPARATOR . 'views/components');
+    }
+
+    /**
+     * Array 
+     */
+    function array_find(array $arr, Closure $fn, $default = null) : mixed
+    {
+        return Arrays::find($arr, $fn, $default);
+    }
+
+    function array_flatten(array $arr) : array
+    {
+        return Arrays::flatten($arr);
+    }
+
+    function array_all(array $arr, Closure $fn) : bool
+    {
+        return Arrays::all($arr, $fn);
+    }
+
+    /**
+     */
+    function with(mixed $var, Closure $fn) : mixed
+    {
+        return $fn($var);
     }

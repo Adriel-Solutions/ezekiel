@@ -222,7 +222,7 @@
 
             // Entrypoint for the routing dispatch mechanism
             $prefix = $this->routes_prefix ?? "";
-            $available_route_binds = $this->routes[$method];
+            $available_route_binds = isset($this->routes[$method]) ? $this->routes[$method] : [];
             $triggered_handlers = [];
 
             // Loop through all the known routes of this router
@@ -249,8 +249,14 @@
                 preg_match_all('/'.$regex.'/', $route, $params);
                 if(!empty($params)) {
                     array_shift($params);
-                    foreach($params as $key => $value)
+                    // Use manual indexing instead of relying on preg_match indexing
+                    $idx_param = 0;
+                    foreach($params as $key => $value) {
+                        if(is_numeric($key)) continue;
                         $req->params[$key] = $value[0];
+                        $req->params[$idx_param] = $value[0];
+                        $idx_param++;
+                    }
                 }
 
                 // Append all the matched route's handlers to an array

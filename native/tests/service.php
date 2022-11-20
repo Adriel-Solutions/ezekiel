@@ -7,7 +7,8 @@
 
     use native\libs\Service;
     use native\libs\Database;
-    use native\libs\Options;
+use native\libs\Dialect;
+use native\libs\Options;
 
     final class ServiceTest extends TestCase
     {
@@ -329,6 +330,11 @@
                 $this->s_children->update(1, [ 'name' => 'Lord Voldemort' ])
             );
 
+            $this->assertEquals(
+                [ 'pk' => 1 , 'name' => 'Lord Voldemort', 'age' => 2, 'fk_parent_1' => 1, 'fk_parent_2' => 2 ],
+                $this->s_children->update(1, [ 'name' => NULL ])
+            );
+
             if(!Options::get('ENCRYPTION_ENABLED'))
                 $this->assertEquals(
                     [ 'pk' => 1 , 'name' => 'Lord Voldemort', 'age' => 18, 'fk_parent_1' => 1, 'fk_parent_2' => 2 ],
@@ -419,6 +425,7 @@
                             'value' => 2
                         ]
                     ],
+                    [],
                     false
                 )
             );

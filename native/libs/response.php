@@ -273,6 +273,14 @@
         }
 
         /**
+         * Handy HTTP Too Many Requests response alias
+         */
+        public function send_too_many_requests($params = []) {
+            $default = [ 'code' => Constants::$HTTP_TOOMANYREQUESTS_CODE, 'status' => Constants::$HTTP_TOOMANYREQUESTS_STATUS ];
+            $this->send(array_merge($params, $default));
+        }
+
+        /**
          * Handy HTTP Unauthorized response alias
          */
         public function send_unauthorized($params = []) {

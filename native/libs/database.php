@@ -21,7 +21,7 @@
             return [
                 'integer' => PDO::PARAM_INT,
                 'string' => PDO::PARAM_STR,
-                'boolean' => PDO::PARAM_BOOL
+                'boolean' => PDO::PARAM_BOOL,
             ][$php_type];
         }
 
@@ -78,7 +78,6 @@
             $stmt = self::$current->prepare($sql);
             foreach($params as $k => $v)
                 $stmt->bindValue(":$k", $v, self::_pdo_param_type(gettype($v)));
-            /* $stmt->execute($params ?? []); */
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }

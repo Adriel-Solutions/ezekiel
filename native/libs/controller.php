@@ -29,6 +29,11 @@
          */
         protected function load() {}
 
+        private function forward(Request $req, Response $res, string $new_path) 
+        {
+            // @TODO implement
+        }
+
         /**
          * Adds an instance of Adapter to the internal list
          *
@@ -66,7 +71,7 @@
 
                 $filters[] = [
                     'column' => $k,
-                    'operator' => $schema[$k],
+                    'operator' => $v !== '[NULL]' ? $schema[$k] : 'IS',
                     'value' => in_array($schema[$k], ['LIKE', 'ILIKE']) ? "%$v%" : $v
                 ];
             }
@@ -92,4 +97,5 @@
 
             return join('&', $filters);
         }
+
     }

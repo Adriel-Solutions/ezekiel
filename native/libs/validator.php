@@ -18,10 +18,12 @@
 
         public static function is_min_length($value, $l) { return strlen($value) >= $l; }
         public static function is_max_length($value, $l) { return strlen($value) <= $l; }
+        public static function is_length($value, $l) { return strlen($value) == $l; }
 
         public static function is_string($value) { return is_string($value); }
         public static function is_regex($value, $r) { return is_string($value) && preg_match($r, $value); }
         public static function is_email($value) { return filter_var($value, FILTER_VALIDATE_EMAIL) !== false; }
+        public static function is_json($value) { json_decode($value); return json_last_error() === JSON_ERROR_NONE; }
 
         public static function is_date($value) { return is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) == true; }
 
@@ -34,11 +36,23 @@
         public static function is_min($value, $a) { return self::is_numeric($value) && $value >= $a; }
         public static function is_max($value, $a) { return self::is_numeric($value) && $value <= $a; }
 
+        public static function is_array($v) { return is_array($v); }
+
         public static function is_unique($value, $table, $key) { 
             $service = new Service();
             $service->set_table($table);
 
             if($service->exists_one([ "$key" => $value ]))
+                return false;
+
+            return true; 
+        }
+
+        public static function is_unique_icase($value, $table, $key) { 
+            $service = new Service();
+            $service->set_table($table);
+
+            if($service->exists_one([ "[UPPER($key)]" => strtoupper($value) ]))
                 return false;
 
             return true; 
@@ -145,6 +159,9 @@
 
         /**
          * Remove unnecessary fields from an input passed by parameter
+         * Lowercase emails
+         * Remove optional empty parameters
+         *
          * Assumption made : The schema + payload were first validated prior to calling enforce_schema
          *
          * @param {&array} $payload The user input
@@ -152,7 +169,16 @@
          */
         public static function enforce_schema(&$payload, $schema) {
             foreach($payload as $key => $value) {
-                if(isset($schema[$key])) continue;
+                if(isset($schema[$key]) && $value !== NULL) {
+                    if(in_array('email', $schema[$key]))  {
+                        $payload[$key] = strtolower($payload[$key]);
+                    }
+
+                    if(in_array('optional',$schema[$key]) && empty($payload[$key]))
+                        unset($payload[$key]);
+
+                    continue;
+                }
                 unset($payload[$key]);
             }
         }
@@ -175,7 +201,8 @@
                 if(empty($rules)) continue;
 
                 if(!isset($payload[$key]))
-                    $value = NULL;
+                    /* $value = NULL; */
+                    $value = '';
                 else
                     $value = $payload[$key];
 

@@ -4,7 +4,7 @@
     class Job {
         private int|string $id;
 
-        public function __construct($id) {
+        public function __construct($id = null) {
             if(empty($id)) return;
 
             $this->id = $id;
