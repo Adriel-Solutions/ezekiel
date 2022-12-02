@@ -4,6 +4,29 @@
 
     class Arrays {
 
+        public static function group(array $arr, mixed $key) : array {
+            if(empty($arr)) return [];
+            if(empty($key)) return $arr;
+
+            $none_key = 'unassociated';
+            $new_arr = [ $none_key => [] ];
+            foreach($arr as $e) {
+                if(empty($e[$key]))
+                    $e_key = $none_key;
+                else
+                    $e_key = $e[$key];
+
+                if(!isset($new_arr[$e_key])) {
+                    $new_arr[$e_key] = [ $e ];
+                    continue;
+                }
+
+                $new_arr[$e_key][] = $e;
+            }
+
+            return $new_arr;
+        }
+
         /**
          * Retrieve an array's value via dot-notation path
          * For instance : $array['business.address.zip']

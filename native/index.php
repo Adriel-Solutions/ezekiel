@@ -51,6 +51,11 @@
     }
 
     /**
+     * Sessions lifetime increase
+     */
+    ini_set('session.gc_maxlifetime', 144000);
+
+    /**
      * Database connection
     */
     Database::load();

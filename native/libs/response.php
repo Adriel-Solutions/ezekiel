@@ -217,9 +217,9 @@
             include $skeletons_dir . '/skeletons/body_open.php';
 
             if(empty($params['module']))
-                include $views_dir . "$view.php";
+                include strtolower($views_dir . "$view.php");
             else
-                include $module_views_dir . "$view.php";
+                include strtolower($module_views_dir . "$view.php");
 
             include $skeletons_dir . '/skeletons/body_close.php';
             include $skeletons_dir . '/skeletons/html_close.php';

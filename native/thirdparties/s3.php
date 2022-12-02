@@ -99,6 +99,17 @@
 
         public static function create_presigned_url_download(string $filename) : string
         {
+            // Caching system 
+            // @TODO Potential refactoring ?
+            $service = default_service('storage_s3_medias');
+            $conditions = [
+                [ 'column' => 'filename' , 'value' => $filename ],
+                [ 'column' => 'expires_at' , 'operator' => '>' , 'value' => date('c') ]
+            ];
+            if($service->exists_one($conditions))
+                return $service->find_one([ 'filename' => $filename ])['url'];
+
+            // Cache not found, create a link
             self::setup_client();
 
             $command = self::$client->getCommand('GetObject', [
@@ -107,7 +118,22 @@
             ]);
 
             $request = self::$client->createPresignedRequest($command, Options::get('STORAGE_S3_DEFAULT_DOWNLOAD_TIME'));
-            return (string) $request->getUri();
+            $url = (string) $request->getUri();
+
+            if($service->exists_one([ 'filename' => $filename ]))
+                $service->find_and_update(
+                    [ 'filename' => $filename ],
+                    [ 'url' => $url , 'expires_at' => date('c', strtotime('+' . Options::get('STORAGE_S3_DEFAULT_DOWNLOAD_TIME'), time())) ]
+                );
+            else
+                $service->create(
+                    [ 
+                        'filename' => $filename,
+                        'url' => $url,
+                        'expires_at' => date('c', strtotime('+' . Options::get('STORAGE_S3_DEFAULT_DOWNLOAD_TIME'), time())) ]
+                );
+
+            return $url;
         }
 
         public static function create_presigned_url_upload(string $filename) : string
