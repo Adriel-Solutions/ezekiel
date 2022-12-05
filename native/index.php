@@ -53,7 +53,8 @@
     /**
      * Sessions lifetime increase
      */
-    ini_set('session.gc_maxlifetime', 144000);
+    ini_set('session.gc_maxlifetime', strtotime(Options::get('SESSIONS_DURATION'), 0));
+    ini_set('session.cookie_lifetime', strtotime(Options::get('SESSIONS_DURATION'), 0));
 
     /**
      * Database connection
