@@ -15,6 +15,7 @@
         public static function is_required($value) { return isset($value); }
         public static function is_not_empty($value) { return !empty($value); }
         public static function is_optional($value) { return $value === '' || !isset($value); }
+        public static function is_nullable($value) { return true; }
 
         public static function is_min_length($value, $l) { return strlen($value) >= $l; }
         public static function is_max_length($value, $l) { return strlen($value) <= $l; }
@@ -170,12 +171,14 @@
         public static function enforce_schema(&$payload, $schema) {
             foreach($payload as $key => $value) {
                 if(isset($schema[$key]) && $value !== NULL) {
-                    if(in_array('email', $schema[$key]))  {
+                    if(in_array('email', $schema[$key]))
                         $payload[$key] = strtolower($payload[$key]);
-                    }
 
                     if(in_array('optional',$schema[$key]) && empty($payload[$key]))
-                        unset($payload[$key]);
+                        if(!in_array('nullable', $schema[$key]))
+                            unset($payload[$key]);
+                        else 
+                            $payload[$key] = null;
 
                     continue;
                 }
