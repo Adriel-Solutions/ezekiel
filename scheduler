@@ -1,0 +1,6 @@
+#!/bin/bash
+while true
+do
+ /usr/bin/docker exec -t ezekiel-MTE1NDcK-fpm sh -c "/usr/local/bin/php /app/native/bin/scheduler.php"
+ sleep 15
+done
