@@ -89,6 +89,11 @@
                     'Bucket' => Options::get('STORAGE_S3_BUCKET'),
                     'Key'    => $filename,
                 ]);
+
+                // Delete from cache
+                $service = default_service('storage_s3_medias');
+                if($service->exists_one([ 'filename' => $filename ]))
+                    $service->find_and_delete([ 'filename' => $filename ]);
             } catch (Throwable $e) {
                 /* throw $e; */
                 return false;
@@ -123,7 +128,10 @@
             if($service->exists_one([ 'filename' => $filename ]))
                 $service->find_and_update(
                     [ 'filename' => $filename ],
-                    [ 'url' => $url , 'expires_at' => date('c', strtotime('+' . Options::get('STORAGE_S3_DEFAULT_DOWNLOAD_TIME'), time())) ]
+                    [ 
+                        'url' => $url ,
+                        'expires_at' => date('c', strtotime('+' . Options::get('STORAGE_S3_DEFAULT_DOWNLOAD_TIME'), time())) 
+                    ]
                 );
             else
                 $service->create(
@@ -138,6 +146,10 @@
 
         public static function create_presigned_url_upload(string $filename) : string
         {
+            $service = default_service('storage_s3_medias');
+            if($service->exists_one([ 'filename' => $filename ]))
+                $service->find_and_delete([ 'filename' => $filename ]);
+
             self::setup_client();
 
             $command = self::$client->getCommand('PutObject', [
