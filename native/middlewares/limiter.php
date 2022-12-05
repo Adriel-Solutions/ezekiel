@@ -1,8 +1,8 @@
 <?php
     namespace native\middlewares;
     use native\libs\Middleware;
-use native\libs\Queue;
-use native\libs\Request;
+    use native\libs\Queue;
+    use native\libs\Request;
     use native\libs\Response;
 
     class Limiter extends Middleware {

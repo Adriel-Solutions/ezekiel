@@ -40,3 +40,24 @@ CREATE TABLE jobs (
 
     PRIMARY KEY (pk)
 );
+
+-- attempts
+CREATE TABLE attempts (
+    pk INT GENERATED ALWAYS AS IDENTITY,
+
+    ip TEXT NOT NULL,
+    uri TEXT NOT NULL,
+    at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    PRIMARY KEY (pk)
+);
+
+-- s3 cache
+CREATE TABLE storage_s3_medias (
+    pk INT GENERATED ALWAYS AS IDENTITY,
+    filename TEXT NOT NULL,
+    url TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+
+    PRIMARY KEY(pk)
+);
