@@ -24,6 +24,7 @@
         public static function is_string($value) { return is_string($value); }
         public static function is_regex($value, $r) { return is_string($value) && preg_match($r, $value); }
         public static function is_email($value) { return filter_var($value, FILTER_VALIDATE_EMAIL) !== false; }
+        public static function is_url($value) { return filter_var($value, FILTER_VALIDATE_URL) !== false; }
         public static function is_json($value) { json_decode($value); return json_last_error() === JSON_ERROR_NONE; }
 
         public static function is_date($value) { return is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) == true; }
@@ -53,7 +54,13 @@
             $service = new Service();
             $service->set_table($table);
 
-            if($service->exists_one([ "[UPPER($key)]" => strtoupper($value) ]))
+            $conditions = [
+                [
+                    'expression' => "UPPER($key)",
+                    'value' => strtoupper($value)
+                ]
+            ];
+            if($service->exists_one($conditions))
                 return false;
 
             return true; 

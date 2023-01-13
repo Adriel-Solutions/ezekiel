@@ -103,7 +103,7 @@
         if(Options::get('STORAGE_S3_HOST'))
             return \native\thirdparties\S3::create_presigned_url_download($path);
 
-        return Options::get('ROOT_ASSETS') . '/' . Options::get('UPLOADS_DIR') . '/' . $path ;
+        return Options::get('ROOT_STORAGE') . '/' . $path ;
     }
 
     function front_asset_path(string $path) : string {

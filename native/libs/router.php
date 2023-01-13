@@ -186,7 +186,7 @@
             $ip = Options::get('IS_BEHIND_PROXY') === true ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
             $method = strtoupper($_SERVER['REQUEST_METHOD']);
             $user_agent = !isset($_SERVER['HTTP_USER_AGENT']) ? 'Unknown' : $_SERVER['HTTP_USER_AGENT'];
-            $route = $_SERVER['REQUEST_URI'] === "/" ? '/' : rtrim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
+            $route = $_SERVER['REQUEST_URI'] === "/" ? '' : rtrim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
             $uri = $_SERVER['REQUEST_URI'];
 
             // Store the headers lowercased
@@ -221,17 +221,17 @@
             ]);
 
             // Entrypoint for the routing dispatch mechanism
-            $prefix = $this->routes_prefix ?? "";
+            $prefix = $this->routes_prefix ?: "";
             $available_route_binds = isset($this->routes[$method]) ? $this->routes[$method] : [];
             $triggered_handlers = [];
 
             // Loop through all the known routes of this router
             foreach($available_route_binds as $route_bind) {
-                $available_route = $route_bind[0];
+                $available_route = $route_bind[0] ?: '/';
                 $handlers = array_slice($route_bind, 1);
 
                 // Create a regex from the internal route, to check if it matches later
-                if($available_route === "/")
+                if($available_route === "/") 
                     $regex = '^'.str_replace('/', '\\/', $prefix).'$';
                 else
                     $regex = '^'.str_replace('/', '\\/', $prefix.$available_route).'$';
@@ -326,6 +326,82 @@
                 if(!$next) break;
 
                 $handler($req, $res, $next, $error);
+            }
+        }
+
+        public function redispatch(Request $req) : void
+        {
+            $route = $req->route;
+            $method = $req->method;
+
+            $res = new Response([
+                'route' => $route
+            ]);
+
+            // Entrypoint for the routing dispatch mechanism
+            $prefix = $this->routes_prefix ?: "";
+            $available_route_binds = isset($this->routes[$method]) ? $this->routes[$method] : [];
+            $triggered_handlers = [];
+
+            // Loop through all the known routes of this router
+            foreach($available_route_binds as $route_bind) {
+                $available_route = $route_bind[0] ?: '/';
+                $handlers = array_slice($route_bind, 1);
+
+                // Create a regex from the internal route, to check if it matches later
+                if($available_route === "/") 
+                    $regex = '^'.str_replace('/', '\\/', $prefix).'$';
+                else
+                    $regex = '^'.str_replace('/', '\\/', $prefix.$available_route).'$';
+
+
+                // Turns the route params into standard regex parts
+                // :route_param -> [a-ZA-Z0-9_-]+
+                if(strpos($regex, ':') !== false)
+                    $regex = preg_replace('/\:([a-zA-Z_]+)/', '(?<$1>[a-zA-Z0-9_-]+)', $regex);
+
+                // Check if the requested route matches the current available route regex
+                if(!preg_match('/'.$regex.'/', $route)) continue;
+
+                // Try to extract the route params from the requested route (/route/38/sub-route -> 38)
+                $params = [];
+                preg_match_all('/'.$regex.'/', $route, $params);
+                if(!empty($params)) {
+                    array_shift($params);
+                    // Use manual indexing instead of relying on preg_match indexing
+                    $idx_param = 0;
+                    foreach($params as $key => $value) {
+                        if(is_numeric($key)) continue;
+                        $req->params[$key] = $value[0];
+                        $req->params[$idx_param] = $value[0];
+                        $idx_param++;
+                    }
+                }
+
+                // Append all the matched route's handlers to an array
+                foreach($handlers as $handler)
+                    array_push($triggered_handlers, $handler);
+            }
+
+            // If no route was found / no handler was associated with the matched route, exit
+            if(empty($triggered_handlers)) return;
+
+            // This boolean is passed by reference to each and every handler
+            // When a handler decides to stop the waterfall execution, it sets $next to false
+            $next = true;
+
+            // Sequential call of all the matched route's handlers
+            foreach($triggered_handlers as $handler){
+                if(!$next) break;
+
+                if($res->_is_sent) break;
+
+                try {
+                    $handler($req, $res, $next);
+                } catch (Throwable $error) {
+                    $next = false;
+                    $this->dispatch_error($req, $res, $error);
+                }
             }
         }
     }

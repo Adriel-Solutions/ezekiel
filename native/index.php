@@ -51,10 +51,12 @@
     }
 
     /**
-     * Sessions lifetime increase
+     * Sessions lifetime increase and relocation
      */
     ini_set('session.gc_maxlifetime', strtotime(Options::get('SESSIONS_DURATION'), 0));
     ini_set('session.cookie_lifetime', strtotime(Options::get('SESSIONS_DURATION'), 0));
+    ini_set('session.save_path', DIR_ROOT . '/storage/sessions');
+    ini_set('session.name', 'EZEKIELID');
 
     /**
      * Database connection

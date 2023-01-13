@@ -7,7 +7,6 @@
     class Front extends Router {
         protected function load() {
             $this->set_prefix(Options::get('ROOT_FRONT'));
-
             $this->mount(new \app\routers\Front());
 
             // Default not-found handler

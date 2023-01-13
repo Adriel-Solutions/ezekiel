@@ -3,9 +3,9 @@
     namespace native\middlewares;
 
     use native\libs\Middleware;
-use native\libs\Request;
-use native\libs\Response;
-use native\libs\Service;
+    use native\libs\Request;
+    use native\libs\Response;
+    use native\libs\Service;
 
     class Authentication extends Middleware {
         // Type of authentication 

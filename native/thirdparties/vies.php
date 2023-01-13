@@ -6,7 +6,7 @@
 
     class Vies {
         // Expected format : LLXXXXX (Letter-Letter-ManyDigits )
-        public function is_valid(string $vat_number) : bool 
+        public static function is_valid(string $vat_number) : bool 
         {
             if(strlen($vat_number) < 3) return false;
 

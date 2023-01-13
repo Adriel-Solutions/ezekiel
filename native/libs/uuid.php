@@ -7,6 +7,12 @@
      */
     class UUID
     {
+        public static function has_proper_format(string $uuid) : bool
+        {
+            $regex = '/^[a-f\d]{8}(-[a-f\d]{4}){4}[a-f\d]{8}$/i';
+            return is_string($uuid) && (preg_match($regex, $uuid) === 1);
+        }
+
         /**
          * Outputs a UUID v5
          *

@@ -183,9 +183,10 @@
                     continue;
                 }
 
-                $c['value'] = '[NULL]';
+                /* $c['value'] = '[NULL]'; */
+                $c['value'] = NULL;
 
-                    /* $c['operator'] = 'IS'; */
+                /* $c['operator'] = 'IS'; */
 
                 $new_conditions[] = $c;
             }
@@ -213,7 +214,8 @@
                     $new_value = 1;
 
                 if ( is_null($v) )
-                    $new_value = '[NULL]';
+                    /* $new_value = '[NULL]'; */
+                    $new_value = null;
 
                 $new_payload[$k] = $new_value;
             }
@@ -227,6 +229,7 @@
          * Assumption : supplied $conditions are already normalized
          */
         protected function _auto_alias(array $conditions) : array {
+            $custom_index = 1;
             $columns = [  ];
             $new_conditions = [  ];
 
@@ -236,6 +239,15 @@
                 // Developer-supplied alias -> Nothing to do
                 if(!empty($c['alias'])) {
                     $new_conditions[] = $new_condition;
+                    continue;
+                }
+
+                // Developer-supplied expression -> Create a named value
+                if(!empty($c['expression'])) {
+                    $columns['custom_' .$custom_index] = 1;
+                    $new_condition['alias'] = 'custom_' . $custom_index;
+                    $new_conditions[] = $new_condition;
+                    $custom_index++;
                     continue;
                 }
 
@@ -254,12 +266,12 @@
 
             // Raw SQL -> alias
             $idx = 0;
-            foreach($new_conditions as &$nc) {
-                if(!str_starts_with($nc['column'], '['))
-                    continue;
+            /* foreach($new_conditions as &$nc) { */
+            /*     /1* if(!str_starts_with($nc['column'], '[')) *1/ */
+            /*     /1*     continue; *1/ */
 
-                $nc['alias'] = 'computed_value_' . $idx++;
-            }
+            /*     $nc['alias'] = 'computed_value_' . $idx++; */
+            /* } */
 
             return $new_conditions;
         }
@@ -295,19 +307,26 @@
             // Process the conditions
             foreach($conditions as $c) {
                 // Column is an SQL expression, example : LENGTH(col)
-                if(str_starts_with($c['column'], '[')) {
-                    if(self::$is_encryption_enabled)
-                        throw new Exception('SQL expressions are not supported when encryption is enabled');
+                // @TODO FIX THAT
+                /* if(str_starts_with($c['column'], '[')) { */
+                /*     if(self::$is_encryption_enabled) */
+                /*         throw new Exception('SQL expressions are not supported when encryption is enabled'); */
+                /*     else */
+                /*         $c['column'] = str_replace([ '[' , ']' ], '', $c['column']); */
+                /* } */
+                if(!empty($c['expression']))
+                    $c_str = $c['expression'];
+                else {
+                    if ( $has_to_be_decrypted )
+                        $c_str = $this->_build_decrypted_column_str($c['column']);
                     else
-                        $c['column'] = str_replace([ '[' , ']' ], '', $c['column']);
+                        $c_str = $c['column'];
                 }
 
-                if ( $has_to_be_decrypted )
-                    $c_str = $this->_build_decrypted_column_str($c['column']);
+                if(!empty($c['expression']))
+                    $column = empty($c['alias']) ? $c['expression'] : $c['alias'];
                 else
-                    $c_str = $c['column'];
-
-                $column = empty($c['alias']) ? $c['column'] : $c['alias'];
+                    $column = empty($c['alias']) ? $c['column'] : $c['alias'];
 
                 $c_str .= ' ';
 
@@ -330,8 +349,9 @@
                     $c_str .= ')';
                 }
                 // Value = [SQL_STUFF]
-                elseif(str_starts_with($c['value'], '['))
-                    $c_str .= str_replace([ '[' , ']' ], '', $c['value']);
+                // @TODO FIX THAT
+                /* elseif(str_starts_with($c['value'], '[')) */
+                /*     $c_str .= str_replace([ '[' , ']' ], '', $c['value']); */
                 // Value = Literal
                 else {
                     $c_str .= ' :' ;
@@ -374,20 +394,27 @@
                 $placeholder = null;
 
                 // Value = [SQL_STUFF]
-                if(str_starts_with($v, '['))
-                    $placeholder = str_replace([ '[' , ']' ], '', $v);
-                // Value = Literal
-                else {
-                    $placeholder .= ' :' ;
+                // @TODO FIX THAT !!!!
+                /* if(str_starts_with($v, '[')) */
+                /*     $placeholder = str_replace([ '[' , ']' ], '', $v); */
+                /* // Value = Literal */
+                /* else { */
+                if(true) {
+                    if(is_null($v)) {
+                        $placeholder = 'NULL';
+                    }
+                    else {
+                        $placeholder = ' :' ;
 
-                    if ( !empty($placeholder_prefix) )
-                        $k = $placeholder_prefix . $k;
+                        if ( !empty($placeholder_prefix) )
+                            $k = $placeholder_prefix . $k;
 
-                    // table.column
-                    if( str_contains($k, '.') )
-                        $placeholder .= str_replace('.', '_', $k);
-                    else
-                        $placeholder .= $k;
+                        // table.column
+                        if( str_contains($k, '.') )
+                            $placeholder .= str_replace('.', '_', $k);
+                        else
+                            $placeholder .= $k;
+                    }
                 }
 
                 // Intentional SQL cast to text
@@ -414,15 +441,21 @@
             $fields_strs = [];
 
             foreach($payload as $k => $v) {
+                /* if(is_null($v)) continue; */
+
                 $f_str = "";
 
                 $placeholder = null;
 
                 // Value = [SQL_STUFF]
-                if(str_starts_with($v, '['))
-                    $placeholder = str_replace([ '[' , ']' ], '', $v);
+                // @TODO FIX THAT !!!!
+                /* if(str_starts_with($v, '[')) */
+                /*     $placeholder = str_replace([ '[' , ']' ], '', $v); */
                 // Value = Literal
-                else {
+                /* else { */
+                if(true) {
+                    if(is_null($v)) continue;
+
                     $placeholder .= ' :' ;
 
                     if ( !empty($placeholder_prefix) )
@@ -491,10 +524,14 @@
 
             foreach($conditions as $c) {
                 // Value = [SQL_STUFF]
-                if(is_string($c['value']) && str_starts_with($c['value'], '['))
-                    continue;
+                // @TODO FIX THAT !!!!
+                /* if(is_string($c['value']) && str_starts_with($c['value'], '[')) */
+                /*     continue; */
 
-                $column = !empty($c['alias']) ? $c['alias'] : $c['column'];
+                if(!empty($c['expression']))
+                    $column = !empty($c['alias']) ? $c['alias'] : $c['expression'];
+                else
+                    $column = !empty($c['alias']) ? $c['alias'] : $c['column'];
 
                 if(!empty($placeholder_prefix))
                     $column = $placeholder_prefix . $column;
@@ -506,6 +543,10 @@
 
                     continue;
                 }
+
+                // Value = null
+                if(is_null($c['value']))
+                    continue;
 
                 // Value = Literal
                 if(str_contains($column, '.'))
@@ -934,7 +975,7 @@
             $fields = array_keys($payload);
             $primary_key = $this->primary_key;
 
-            $parenthesis_str = join(', ', $fields);
+            $parenthesis_str = join(', ', array_filter($fields, fn($f) => !is_null($payload[$f])));
             $values_str = $this->_build_insert_values_str($payload);
 
             if ( self::$is_encryption_enabled ) {
@@ -952,8 +993,12 @@
 
             $new_payload = [];
             foreach($payload as $k => $v) {
-                if(str_starts_with($v,'[')) continue;
-                else $new_payload[$k] = $v;
+                // @TODO FIX THAT !!!!
+                /* if(str_starts_with($v,'[')) continue; */
+                /* else $new_payload[$k] = $v; */
+                if(is_null($v)) continue;
+
+                $new_payload[$k] = $v;
             }
 
             if('pgsql' === Database::get_driver()) 
@@ -1048,7 +1093,6 @@
             $where_payload = $this->_build_query_payload($conditions);
 
             $set_str = $this->_build_set_str($payload, 'new_');
-
             $set_payload = $this->_build_query_payload($payload, 'new_');
 
             $returned_columns = $this->_build_returned_columns_str();

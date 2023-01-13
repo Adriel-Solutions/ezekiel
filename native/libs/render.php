@@ -25,18 +25,18 @@
          */
         public static function partial($key, $params = []) {
             $key = strtolower($key);
-            $path = DIR_APP . "/views/partials/$key.php";
+            $path = strtolower(DIR_APP . "/views/partials/$key.php");
 
             ob_start();
             self::_debug_comment($path);
-            include DIR_APP . "/views/partials/$key.php";
+            include $path;
             $output = ob_get_clean();
             echo $output;
         }
 
         public static function native_partial($key, $params = []) {
             $key = strtolower($key);
-            $path = DIR_NATIVE . "/views/partials/$key.php";
+            $path = strtolower(DIR_NATIVE . "/views/partials/$key.php");
 
             ob_start();
             self::_debug_comment($path);
@@ -47,7 +47,7 @@
 
         public static function module_custom($module, $key, $params = [], bool $return = false) {
             $key = strtolower($key);
-            $path = DIR_APP . "/modules/$module/views$key.php";
+            $path = strtolower(DIR_APP . "/modules/$module/views$key.php");
 
             ob_start();
             self::_debug_comment($path);
@@ -62,7 +62,7 @@
 
         public static function module_partial($module, $key, $params = []) {
             $key = strtolower($key);
-            $path = DIR_APP . "/modules/$module/views/partials/$key.php";
+            $path = strtolower(DIR_APP . "/modules/$module/views/partials/$key.php");
 
             ob_start();
             self::_debug_comment($path);
@@ -81,7 +81,7 @@
          */
         public static function layout($key, $params = []) {
             $key = strtolower($key);
-            $path = DIR_APP . "/views/layouts/$key.php";
+            $path = strtolower(DIR_APP . "/views/layouts/$key.php");
 
             ob_start();
             self::_debug_comment($path);
@@ -92,7 +92,7 @@
 
         public static function native_layout($key, $params = []) {
             $key = strtolower($key);
-            $path = DIR_NATIVE . "/views/layouts/$key.php";
+            $path = strtolower(DIR_NATIVE . "/views/layouts/$key.php");
 
             ob_start();
             self::_debug_comment($path);
@@ -111,7 +111,7 @@
          */
         public static function component($key, $params = []) {
             $key = strtolower($key);
-            $path = DIR_APP . "/views/components/$key.php";
+            $path = strtolower(DIR_APP . "/views/components/$key.php");
 
             ob_start();
             self::_debug_comment($path);
@@ -122,7 +122,7 @@
 
         public static function native_component($key, $params = []) {
             $key = strtolower($key);
-            $path = DIR_NATIVE . "/views/components/$key.php";
+            $path = strtolower(DIR_NATIVE . "/views/components/$key.php");
 
             ob_start();
             self::_debug_comment($path);
