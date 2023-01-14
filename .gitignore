@@ -5,7 +5,9 @@ VagrantFile
 /.htaccess
 !configuration/sample.env
 /storage/uploads/*
+/storage/sessions/*
 !storage/uploads/.gitkeep
+!storage/sessions/.gitkeep
 
 /dependencies
 !dependencies/.gitkeep
