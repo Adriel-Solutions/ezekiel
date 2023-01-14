@@ -107,8 +107,7 @@ server {
 
     location / {
         try_files /storage/cache/$uri.html @app;
-        access_log on;
-        log_not_found on;
+        expires    1d;
     }
 
     location @app {
