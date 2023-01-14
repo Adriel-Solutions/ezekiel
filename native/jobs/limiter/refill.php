@@ -8,15 +8,12 @@
         public function run(?array $context): ?string
         {
             $service = default_service('attempts'); 
-            $ip = $context['ip'];
 
-            $oldest_attempt = $service->as_records()->find_one(
-                [ 'ip' => $ip ],
-                [ 'order' => [ 'at' => 'ASC' ] ]
-            );
+            $oldest_attempt = $service->as_records()->get($context['attempt']['pk']);
 
             $oldest_attempt->delete();
 
             return null;
         }
     }
+

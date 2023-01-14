@@ -32,7 +32,7 @@
             $count = $service->find_count([ 'uri' => $uri, 'ip' => $ip ]);
 
             if($count < $this->max) {
-                $service->create([ 
+                $attempt = $service->create([ 
                     'ip' => $ip,
                     'uri' => $uri,
                 ]);
@@ -40,7 +40,7 @@
                 Queue::schedule(new \native\jobs\limiter\Refill())
                        ->in($this->refill_rate . " seconds")
                        ->from('now')
-                       ->with([ 'ip' => $ip ])
+                       ->with([ 'attempt' => $attempt ])
                        ->persist();
 
                 return;
