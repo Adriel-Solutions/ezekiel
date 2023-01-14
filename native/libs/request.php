@@ -74,9 +74,6 @@
             $this->context = [];
         }
 
-        /**
-         * @TODO Reimplement, dispatch must be parametric
-         */
         function forward(Router $from, string $new_route) {
             $this->route = $new_route;
             $from->redispatch($this);
