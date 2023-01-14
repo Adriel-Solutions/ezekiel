@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8f7f2b15cc6d0dd8b29524e64e6bc7c0",
+    "content-hash": "18e76b7e7584922ac7c8df9d34901116",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1609,12 +1609,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Adriel-Solutions/ezekiel-cli.git",
-                "reference": "a844655b70cafc58f483d2e25f274232c80077f9"
+                "reference": "4c0e51a435d2f12870baba20d0328fd3a1f42806"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Adriel-Solutions/ezekiel-cli/zipball/a844655b70cafc58f483d2e25f274232c80077f9",
-                "reference": "a844655b70cafc58f483d2e25f274232c80077f9",
+                "url": "https://api.github.com/repos/Adriel-Solutions/ezekiel-cli/zipball/4c0e51a435d2f12870baba20d0328fd3a1f42806",
+                "reference": "4c0e51a435d2f12870baba20d0328fd3a1f42806",
                 "shasum": ""
             },
             "default-branch": true,
@@ -1637,7 +1637,7 @@
                 "issues": "https://github.com/Adriel-Solutions/ezekiel-cli/issues",
                 "source": "https://github.com/Adriel-Solutions/ezekiel-cli/tree/master"
             },
-            "time": "2022-10-09T10:52:52+00:00"
+            "time": "2023-01-14T09:25:17+00:00"
         },
         {
             "name": "amphp/amp",
