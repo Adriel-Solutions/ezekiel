@@ -106,6 +106,11 @@
         return Options::get('ROOT_STORAGE') . '/' . $path ;
     }
 
+    function cache_path(string $path) : string
+    {
+        return DIR_ROOT . '/storage/cache/' . $path . '.html';
+    }
+
     function front_asset_path(string $path) : string {
         return 
             Options::get('ROOT_ASSETS') 
