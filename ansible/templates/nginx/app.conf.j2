@@ -105,12 +105,13 @@ server {
         break;
     }
 
-    # Default routing
-    # -> /a : API Routes
-    # -> /f : Front Routes
-    # -> /w : Webhooks Routes
-    # All handled by PHP
     location / {
+        try_files /storage/cache/$uri.html @app;
+        access_log on;
+        log_not_found on;
+    }
+
+    location @app {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root/native/bin/app.php;
         fastcgi_param PATH_INFO       $fastcgi_path_info;
