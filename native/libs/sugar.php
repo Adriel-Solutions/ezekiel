@@ -302,6 +302,13 @@
     function module_router(string $module, string $name, array $parameters = [])  : Router        { return _instantiate_from_module('app', $module, 'routers', $name, $parameters); }
     function module_job(string $module, string $name, array $parameters = [])     : Job           { return _instantiate_from_module('app', $module, 'jobs', $name, $parameters); }
 
+    function static_page(string $name) : array
+    {
+        $name = "\app\controllers\\$name";
+        $class = new $name();
+        return [ $class , 'render' ];
+    }
+
     /**
      * Convenient way to create a "default" service for a given table
      */

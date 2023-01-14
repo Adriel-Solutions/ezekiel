@@ -12,6 +12,6 @@
         // -- On refait la page et on la remet en cache
         // - Il faudrait une commande : ezekiel static:build
         // - Cette commande appellerait toutes les pages une par une pour les prebuild
-        abstract public function get_static_props() : array;
-        abstract public function render() : void;
+        public function get_static_props(Request $req) : array { return []; }
+        abstract public function render(Request $req, Response $res) : void;
     }
