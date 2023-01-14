@@ -9,7 +9,5 @@
         protected function load() : void
         {
             Hooks::fire('before_mount_front', $this);
-
-            $this->get('/sign-in', function($req, $res) { $res->send_success(); });
         }
     }
