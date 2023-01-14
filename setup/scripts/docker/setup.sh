@@ -19,5 +19,5 @@ sed -i '' -E "/ports/{N;s/- [0-9]+\:80/- $random_port:80/;}" docker-compose.dev.
 docker-compose -f docker-compose.dev.yml up -d
 composer install
 ./setup/scripts/local/create-new-env.sh
-./setup/scripts/docker/reset-db.sh
+./ezekiel docker:reset
 ./ezekiel docker:migrations
