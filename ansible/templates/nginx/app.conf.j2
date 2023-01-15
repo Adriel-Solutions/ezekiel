@@ -1,13 +1,18 @@
 {% set root = '/var/www/html/app/current' %}
 
 server {
+    server_name www.{{ domain }};
+    return 301 https://{{ domain }}$request_uri;
+}
+
+server {
     # Port
     listen 80 default_server;
     listen 443 ssl default_server;
     listen [::]:443 ssl default_server;
 
     # Virtual host
-    server_name www.{{ domain }} {{ domain }};
+    server_name {{ domain }};
 
     # SSL
     ssl_certificate      /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
