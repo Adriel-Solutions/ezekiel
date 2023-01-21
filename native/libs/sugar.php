@@ -14,6 +14,25 @@
     use native\libs\Hooks;
     use native\libs\Module;
 
+    function ip() : string
+    {
+        $final_ip = "IP-UNKNOWN";
+
+        $forwarded_ip = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? "";
+        $client_ip = $_SERVER["HTTP_CLIENT_IP"] ?? "";
+        $cf_ip = $_SERVER["HTTP_CF_CONNECTING_IP"] ?? "";
+        $remote_ip = $_SERVER["REMOTE_ADDR"] ?? "";
+
+        $all_ips = array_filter(explode(",", "$forwarded_ip,$client_ip,$cf_ip,$remote_ip"));
+        foreach ($all_ips as $ip) {
+            if ($final_ip = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE))
+                break;
+        }
+
+        return $final_ip;
+    }
+
+
     function vd(mixed ...$x) : void
     {
         echo '<pre>';

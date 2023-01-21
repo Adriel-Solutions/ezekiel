@@ -183,7 +183,7 @@
              * Extract the critical information from the HTTP headers
              * (ip, http method, requested route)
              */
-            $ip = Options::get('IS_BEHIND_PROXY') === true ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+            $ip = ip();
             $method = strtoupper($_SERVER['REQUEST_METHOD']);
             $user_agent = !isset($_SERVER['HTTP_USER_AGENT']) ? 'Unknown' : $_SERVER['HTTP_USER_AGENT'];
             $route = $_SERVER['REQUEST_URI'] === "/" ? '' : rtrim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
