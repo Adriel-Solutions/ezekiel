@@ -116,7 +116,7 @@ server {
     }
 
     location / {
-        try_files /storage/cache/$uri.html @app;
+        try_files /storage/app/cache/$uri.html @app;
         expires    1d;
     }
 
