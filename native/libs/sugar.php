@@ -122,12 +122,12 @@
         if(Options::get('STORAGE_S3_HOST'))
             return \native\thirdparties\S3::create_presigned_url_download($path);
 
-        return Options::get('ROOT_STORAGE') . '/' . $path ;
+        return Options::get('ROOT_STORAGE') . '/app/uploads' . $path ;
     }
 
     function cache_path(string $path) : string
     {
-        return DIR_ROOT . '/storage/cache/' . $path . '.html';
+        return DIR_ROOT . '/storage/app/cache/' . $path . '.html';
     }
 
     function front_asset_path(string $path) : string {

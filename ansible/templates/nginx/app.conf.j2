@@ -107,7 +107,7 @@ server {
     # -> /s : App Storage Route
     location /s/ {
         # Requests to /s are internally mapped to /storage
-        alias {{ root }}/storage/uploads/;
+        alias {{ root }}/storage/app/;
 
         # Caching
         expires    7d;
