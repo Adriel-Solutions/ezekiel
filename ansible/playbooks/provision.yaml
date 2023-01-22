@@ -101,6 +101,15 @@
       package:
         name: ufw
 
+    - name: Install global npm packages needed
+      community.general.npm:
+        name: "{{ item }}"
+        global: true
+        with_items:
+          - lightningcss-cli
+          - tailwindcss
+          - uglify-js
+
     - name: Set brute-force limit on SSH
       community.general.ufw:
         rule: limit
