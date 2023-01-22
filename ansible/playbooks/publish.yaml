@@ -35,22 +35,22 @@
     - name: Compress and move previous "current" code into "versions"
       community.general.archive:
         path:
-          - /var/www/html/app/current/app
-          - /var/www/html/app/current/native
-          - /var/www/html/app/current/composer.json
-          - /var/www/html/app/current/composer.lock
-          - /var/www/html/app/current/ezekiel
-        dest: /var/www/html/app/versions/latest.tar.gz
+          - /var/www/html/{{ project_name }}/current/app
+          - /var/www/html/{{ project_name }}/current/native
+          - /var/www/html/{{ project_name }}/current/composer.json
+          - /var/www/html/{{ project_name }}/current/composer.lock
+          - /var/www/html/{{ project_name }}/current/ezekiel
+        dest: /var/www/html/{{ project_name }}/versions/latest.tar.gz
 
     - name: Rename brand new "latest.tar.gz" into a date-formatted filename
       command: "mv latest.tar.gz version-{{ date }}.tar.gz"
       args:
-        chdir: /var/www/html/app/versions
+        chdir: /var/www/html/{{ project_name }}/versions
 
     - name: Pull code remotely from Github
       git:
         repo: "{{ git_repository_url }}"
-        dest: /var/www/html/app/current
+        dest: /var/www/html/{{ project_name }}/current
         update: yes
         force: yes
         version: master
@@ -58,21 +58,21 @@
     - name: Install dependencies
       command: composer install
       args:
-        chdir: /var/www/html/app/current/
+        chdir: /var/www/html/{{ project_name }}/current/
 
     - name: Update dotenv configuration
       copy:
         src: "{{ playbook_dir }}/../../configuration/.production.env"
-        dest: /var/www/html/app/current/configuration/.custom.env
+        dest: /var/www/html/{{ project_name }}/current/configuration/.custom.env
 
     - name: Run migrations
       command: ./ezekiel run:migrations
       args:
-        chdir: /var/www/html/app/current
+        chdir: /var/www/html/{{ project_name }}/current
 
     - name: Find all previous versions
       find:
-        path: /var/www/html/app/versions
+        path: /var/www/html/{{ project_name }}/versions
       register: versions
 
     - name: Keep only the 5 last releases

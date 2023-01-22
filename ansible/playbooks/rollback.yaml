@@ -8,7 +8,7 @@
     - ping: ~
 
     - find:
-        path: /var/www/html/app/versions
+        path: /var/www/html/{{ project_name }}/versions
       register: result
 
     - set_fact:
@@ -28,5 +28,5 @@
     - name: Decompress version inside "current" directory
       unarchive:
         src: "{{ selected_version }}"
-        dest: /var/www/html/app/current
+        dest: /var/www/html/{{ project_name }}/current
         remote_src: true

@@ -71,7 +71,7 @@
 
     - name: Install CRON and Git
       package:
-        name: 
+        name:
           - cron
           - git
         state: present

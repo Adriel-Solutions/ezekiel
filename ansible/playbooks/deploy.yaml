@@ -62,10 +62,9 @@
         path: "{{ item }}"
         state: directory
       with_items:
-        - /var/www/html/app
-        - /var/www/html/app/current
-        - /var/www/html/app/versions
-        - /var/www/html/app/shared
+        - /var/www/html/{{ project_name }}
+        - /var/www/html/{{ project_name }}/current
+        - /var/www/html/{{ project_name }}/versions
 
     - name: Determine whether repository must be created locally
       become: false
@@ -113,7 +112,7 @@
     - name: Pull code remotely from Github
       git:
         repo: "{{ git_repository_url }}"
-        dest: /var/www/html/app/current
+        dest: /var/www/html/{{ project_name }}/current
         update: yes
         force: yes
         version: master
@@ -125,78 +124,19 @@
       become: true
       become_user: postgres
 
-    - name: Create shared folders
+    - name: Remove useless directories for runtime
       file:
-        path: "/var/www/html/app/shared/{{ item }}/"
-        state: directory
-      with_items:
-        - dependencies
-        - storage
-
-    - name: Remove useless directories for runtime + Shared directories
-      file:
-        path: "/var/www/html/app/current/{{ item }}"
+        path: "/var/www/html/{{ project_name }}/current/{{ item }}"
         state: absent
       with_items:
         - ansible
         - docker
         - docker-compose.dev.yml
-        - dependencies
-        - storage
-
-    - name: Link shared folders
-      file:
-        src: "/var/www/html/app/shared/{{ item }}/"
-        dest: "/var/www/html/app/current/{{ item }}"
-        state: link
-      with_items:
-        - dependencies
-        - storage
-
-    - name: Recreate storage structure
-      file:
-        path: "/var/www/html/app/shared/storage/{{ item }}"
-        state: directory
-      with_items:
-        - logs
-        - uploads
-
-    - name: Recreate logs structure
-      file:
-        path: "/var/www/html/app/shared/storage/logs/{{ item }}"
-        state: directory
-      with_items:
-        - nginx
-        - php
-        - app
-
-    - name: Recreate uploads structure
-      file:
-        path: "/var/www/html/app/shared/storage/uploads"
-        state: directory
-
-    # Todo : Fix permissions / owner
-    - name: Set proper permissions for PHP logs
-      file:
-        path: "{{ item }}"
-        mode: "777"
-        state: directory
-      with_items:
-        - "/var/www/html/app/shared/storage"
-        - "/var/www/html/app/shared/storage/logs"
-        - "/var/www/html/app/shared/storage/logs/php"
-
-    # Todo : Fix permissions / owner
-    - name: Set proper permissions for PHP uploads
-      file:
-        path: "/var/www/html/app/shared/storage/uploads"
-        mode: "777"
-        state: directory
 
     - name: Install dependencies
       command: composer install
       args:
-        chdir: /var/www/html/app/current/
+        chdir: /var/www/html/{{ project_name }}/current/
 
     - name: Setup Ezekiel CLI alias
       lineinfile:
@@ -211,13 +151,13 @@
     - name: Upload dotenv configuration for production
       copy:
         src: "{{ playbook_dir }}/../../configuration/.production.env"
-        dest: /var/www/html/app/current/configuration/.custom.env
+        dest: /var/www/html/{{ project_name }}/current/configuration/.custom.env
       tags: conf
 
     - name: Run migrations
       command: ./ezekiel run:migrations
       args:
-        chdir: /var/www/html/app/current
+        chdir: /var/www/html/{{ project_name }}/current
 
     - name: Ensure Nginx is running
       service:

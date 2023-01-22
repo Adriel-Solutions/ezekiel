@@ -2,6 +2,7 @@ all:
   hosts:
     your-ssh-host:
       domain: "your domain without protocol"
+      project_name: "the name of your project"
       git_repository_url: "git repository url ending with .git"
       php_version: 8.1
       ssl_email: "your email"
