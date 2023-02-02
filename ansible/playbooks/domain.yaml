@@ -28,12 +28,12 @@
     - name: Add proper NGINX virtual host
       template:
         src: "{{ playbook_dir }}/../templates/nginx/app.conf.j2"
-        dest: "/etc/nginx/sites-available/ezekiel"
+        dest: "/etc/nginx/sites-available/{{ project_name }}"
       tags: nginx
 
     - name: Enable NGINX virtual host for Ezekiel
       file:
-        src: /etc/nginx/sites-available/ezekiel
-        dest: /etc/nginx/sites-enabled/ezekiel
+        src: /etc/nginx/sites-available/{{ project_name }}
+        dest: /etc/nginx/sites-enabled/{{ project_name }}
         state: link
       tags: nginx

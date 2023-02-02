@@ -16,8 +16,8 @@
 
     - name: Create database user ezekiel
       postgresql_user:
-        name: ezekiel
-        password: ezekiel
+        name: {{ project_name }}
+        password: password
         state: present
       become: true
       become_user: postgres
@@ -25,9 +25,9 @@
     - name: Grant access to the database for ezekiel
       postgresql_privs:
         type: database
-        database: project
-        roles: ezekiel
-        grant_option: no
+        database: {{ project_name }}
+        roles: {{ project_name }}
+        grant_option: yes
         privs: all
       become: true
       become_user: postgres
@@ -36,9 +36,9 @@
       postgresql_pg_hba:
         dest: "~/pg_hba.conf"
         contype: local
-        databases: project
+        databases: {{ project_name }}
         method: md5
-        users: ezekiel
+        users: {{ project_name }}
         create: true
       become: true
       become_user: postgres

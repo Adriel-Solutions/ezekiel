@@ -150,6 +150,7 @@
             $this->_sent_at = microtime(true);
             $this->duration = $this->_sent_at - $this->_created_at;
             $this->size = 0;
+            $this->code = $code;
 
             header("Location: $url", true, $code);
 
@@ -178,9 +179,9 @@
             if($this->_is_sent) return;
 
             // SEO-related
-            $title = $params['title'] ?? 'Sample page';
+            $title = $params['title'] ?? get_option('SEO_DEFAULT_TITLE') ?? 'Sample page';
             $slug = $params['slug'] ?? slugify($title);
-            $description = $params['description'] ?? 'Sample description';
+            $description = $params['description'] ?? get_option('SEO_DEFAULT_DESCRIPTION') ?? 'Sample description';
 
             // Assets-related
             $scripts = $params['scripts'] ?? [];
@@ -196,8 +197,10 @@
             // Output data-injection-related
             $context = $params['context'] ?? [];
             $context['current_path'] = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH) ?? '/';
+            $context['current_slug'] = $slug;
 
             $code = $params['code'] ?? $this->code;
+            $this->code = $code;
 
             http_response_code($code);
             header('Content-type: text/html');

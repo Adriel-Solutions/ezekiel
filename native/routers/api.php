@@ -31,6 +31,25 @@
                     $res->send_success();
                 });
 
+            // Default cache invalidation mechanism, clears the full cache, when applicable
+            if(Options::get('CACHE_ENABLED'))
+                $this->get('/invalidate-all', function(Request $req, Response $res) {
+                    switch(true) {
+                        case empty($req->query):
+                        case empty($req->query['secret']):
+                        case $req->query['secret'] !== Options::get('CACHE_SECRET'):
+                            return $res->send_malformed();
+                    }
+
+                    $files = glob(cache_folder() . '/*.html');
+                    foreach($files as $file) {
+                        if(!is_file($file)) continue;
+                        unlink($file);
+                    }
+
+                    $res->send_success();
+                });
+
             $this->mount(new \app\routers\Api());
 
             // Default not-found handler
