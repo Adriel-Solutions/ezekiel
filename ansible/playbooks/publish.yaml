@@ -48,6 +48,8 @@
         chdir: /var/www/html/{{ project_name }}/versions
 
     - name: Pull code remotely from Github
+      become: true
+      become_user: root
       git:
         repo: "{{ git_repository_url }}"
         dest: /var/www/html/{{ project_name }}/current
@@ -67,6 +69,20 @@
 
     - name: Run migrations
       command: ./ezekiel run:migrations
+      args:
+        chdir: /var/www/html/{{ project_name }}/current
+
+    - name: Run bundle
+      command: ./ezekiel run:bundle
+      become: yes
+      become_user: root
+      args:
+        chdir: /var/www/html/{{ project_name }}/current
+
+    - name: Run invalidate
+      command: ./ezekiel run:invalidate
+      become: yes
+      become_user: root
       args:
         chdir: /var/www/html/{{ project_name }}/current
 
