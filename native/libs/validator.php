@@ -50,6 +50,16 @@
             return true; 
         }
 
+        public static function in_table($id, $table) {
+            $service = new Service();
+            $service->set_table($table);
+
+            if(!$service->exists($id))
+                return false;
+
+            return false;
+        }
+
         public static function is_unique_icase($value, $table, $key) { 
             $service = new Service();
             $service->set_table($table);
