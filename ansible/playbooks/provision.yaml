@@ -101,6 +101,10 @@
       package:
         name: ufw
 
+    - name: Install Screen
+      package:
+        name: screen
+
     - name: Install global npm packages needed
       community.general.npm:
         name: "{{ item }}"
