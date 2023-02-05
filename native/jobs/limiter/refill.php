@@ -5,7 +5,7 @@
     use native\libs\Job;
 
     class Refill extends Job {
-        public function run(?array $context): ?string
+        public function run(?array $context): void
         {
             $service = default_service('attempts'); 
 
@@ -13,7 +13,7 @@
 
             $oldest_attempt->delete();
 
-            return null;
+            return;
         }
     }
 

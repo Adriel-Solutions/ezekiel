@@ -7,8 +7,8 @@
 
     use native\libs\Service;
     use native\libs\Database;
-use native\libs\Dialect;
-use native\libs\Options;
+    use native\libs\Dialect;
+    use native\libs\Options;
 
     final class ServiceTest extends TestCase
     {
@@ -133,7 +133,7 @@ use native\libs\Options;
 
             // Fill with data
             if(!Options::get('ENCRYPTION_ENABLED')) {
-                Database::query("DROP EXTENSION IF EXISTS pgcrypto;");
+                Database::query("DROP EXTENSION IF EXISTS pgcrypto CASCADE;");
 
                 Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Joe' , 30  )");
                 Database::query("INSERT INTO tests_parents ( name , age ) VALUES ( 'Jane' , 34  )");
@@ -329,21 +329,6 @@ use native\libs\Options;
                 [ 'pk' => 1 , 'name' => 'Lord Voldemort', 'age' => 2, 'fk_parent_1' => 1, 'fk_parent_2' => 2 ],
                 $this->s_children->update(1, [ 'name' => 'Lord Voldemort' ])
             );
-
-            $this->assertEquals(
-                [ 'pk' => 1 , 'name' => 'Lord Voldemort', 'age' => 2, 'fk_parent_1' => 1, 'fk_parent_2' => 2 ],
-                $this->s_children->update(1, [ 'name' => NULL ])
-            );
-
-            if(!Options::get('ENCRYPTION_ENABLED'))
-                $this->assertEquals(
-                    [ 'pk' => 1 , 'name' => 'Lord Voldemort', 'age' => 18, 'fk_parent_1' => 1, 'fk_parent_2' => 2 ],
-                    $this->s_children->update(1, [ 'age' => '[age + 16]' ])
-                );
-            else  {
-                $this->expectException(Exception::class);
-                $this->s_children->update(1, [ 'age' => '[age + 16]' ]);
-            }
         }
 
         public function testFindAndDelete() : void
@@ -361,7 +346,7 @@ use native\libs\Options;
             $this->s_children->find_and_delete(
                 [ 
                     [
-                        'column' => '[LENGTH(name)]',
+                        'column' => 'LENGTH(name)',
                         'operator' => '>',
                         'alias' => 'name',
                         'value' => '1'

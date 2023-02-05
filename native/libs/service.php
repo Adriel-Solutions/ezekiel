@@ -178,7 +178,7 @@
             $new_conditions = [  ];
 
             foreach($conditions as $c) {
-                if(!is_null($c['value'])) { 
+                if(!empty($c['expression']) || !is_null($c['value'])) { 
                     $new_conditions[] = $c;
                     continue;
                 }
@@ -307,13 +307,6 @@
             // Process the conditions
             foreach($conditions as $c) {
                 // Column is an SQL expression, example : LENGTH(col)
-                // @TODO FIX THAT
-                /* if(str_starts_with($c['column'], '[')) { */
-                /*     if(self::$is_encryption_enabled) */
-                /*         throw new Exception('SQL expressions are not supported when encryption is enabled'); */
-                /*     else */
-                /*         $c['column'] = str_replace([ '[' , ']' ], '', $c['column']); */
-                /* } */
                 if(!empty($c['expression']))
                     $c_str = $c['expression'];
                 else {
@@ -349,10 +342,6 @@
                     $c_str .= ')';
                 }
                 // Value = [SQL_STUFF]
-                // @TODO FIX THAT
-                /* elseif(str_starts_with($c['value'], '[')) */
-                /*     $c_str .= str_replace([ '[' , ']' ], '', $c['value']); */
-                // Value = Literal
                 else {
                     $c_str .= ' :' ;
 
@@ -393,28 +382,19 @@
 
                 $placeholder = null;
 
-                // Value = [SQL_STUFF]
-                // @TODO FIX THAT !!!!
-                /* if(str_starts_with($v, '[')) */
-                /*     $placeholder = str_replace([ '[' , ']' ], '', $v); */
-                /* // Value = Literal */
-                /* else { */
-                if(true) {
-                    if(is_null($v)) {
-                        $placeholder = 'NULL';
-                    }
-                    else {
-                        $placeholder = ' :' ;
+                if(is_null($v))
+                    $placeholder = 'NULL';
+                else {
+                    $placeholder = ' :' ;
 
-                        if ( !empty($placeholder_prefix) )
-                            $k = $placeholder_prefix . $k;
+                    if ( !empty($placeholder_prefix) )
+                        $k = $placeholder_prefix . $k;
 
-                        // table.column
-                        if( str_contains($k, '.') )
-                            $placeholder .= str_replace('.', '_', $k);
-                        else
-                            $placeholder .= $k;
-                    }
+                    // table.column
+                    if( str_contains($k, '.') )
+                        $placeholder .= str_replace('.', '_', $k);
+                    else
+                        $placeholder .= $k;
                 }
 
                 // Intentional SQL cast to text
@@ -447,26 +427,18 @@
 
                 $placeholder = null;
 
-                // Value = [SQL_STUFF]
-                // @TODO FIX THAT !!!!
-                /* if(str_starts_with($v, '[')) */
-                /*     $placeholder = str_replace([ '[' , ']' ], '', $v); */
-                // Value = Literal
-                /* else { */
-                if(true) {
-                    if(is_null($v)) continue;
+                if(is_null($v)) continue;
 
-                    $placeholder .= ' :' ;
+                $placeholder .= ' :' ;
 
-                    if ( !empty($placeholder_prefix) )
-                        $k = $placeholder_prefix . $k;
+                if ( !empty($placeholder_prefix) )
+                    $k = $placeholder_prefix . $k;
 
-                    // table.column
-                    if( str_contains($k, '.') )
-                        $placeholder .= str_replace('.', '_', $k);
-                    else
-                        $placeholder .= $k;
-                }
+                // table.column
+                if( str_contains($k, '.') )
+                    $placeholder .= str_replace('.', '_', $k);
+                else
+                    $placeholder .= $k;
 
                 // Intentional SQL cast to text
                 if ( self::$is_encryption_enabled )
@@ -523,11 +495,6 @@
             $conditions = $this->_auto_alias($conditions);
 
             foreach($conditions as $c) {
-                // Value = [SQL_STUFF]
-                // @TODO FIX THAT !!!!
-                /* if(is_string($c['value']) && str_starts_with($c['value'], '[')) */
-                /*     continue; */
-
                 if(!empty($c['expression']))
                     $column = !empty($c['alias']) ? $c['alias'] : $c['expression'];
                 else
@@ -535,6 +502,11 @@
 
                 if(!empty($placeholder_prefix))
                     $column = $placeholder_prefix . $column;
+
+                // Value = SQL Expression
+                if(!empty($c['expression']))
+                    continue;
+
 
                 // Value = Array
                 if(is_array($c['value'])) {
@@ -993,9 +965,6 @@
 
             $new_payload = [];
             foreach($payload as $k => $v) {
-                // @TODO FIX THAT !!!!
-                /* if(str_starts_with($v,'[')) continue; */
-                /* else $new_payload[$k] = $v; */
                 if(is_null($v)) continue;
 
                 $new_payload[$k] = $v;

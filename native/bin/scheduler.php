@@ -106,11 +106,7 @@
                 ]
             );
 
-            $new_report = $instance->run($context);
-
-            if ( !empty($new_report) )
-                $report = $new_report;
-
+            $instance->run($context);
         } catch (Throwable $e) {
             $report = $e;
 

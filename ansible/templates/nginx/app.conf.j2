@@ -104,16 +104,6 @@ server {
         expires    7d;
     }
 
-    # Requests to /s are internally mapped to app /storage
-    location /s/ {
-        alias {{ root }}/storage/app/;
-
-        # Caching
-        expires    7d;
-
-        break;
-    }
-
     # -> /s : App Storage Route
     location /s/ {
         # Requests to /s are internally mapped to /storage
@@ -123,6 +113,11 @@ server {
         expires    7d;
 
         break;
+    }
+
+    location = / {
+        try_files /storage/app/cache/index.html @app;
+        expires    1d;
     }
 
     location / {
