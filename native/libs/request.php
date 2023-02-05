@@ -25,6 +25,9 @@
         // Headers, all lower-cased
         public $headers;
 
+        // Domain
+        public $domain;
+
         // Route parameters, like in /users/:user_id <-- x
         public $params;
 
@@ -63,6 +66,7 @@
             $this->ip = $params['ip'];
             $this->route = $params['route'];
             $this->headers = $params['headers'];
+            $this->domain = $params['domain'];
             $this->method = $params['method'];
             $this->body = [];
             $this->raw = $params['raw'];

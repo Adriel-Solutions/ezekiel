@@ -185,6 +185,7 @@
              */
             $ip = ip();
             $method = strtoupper($_SERVER['REQUEST_METHOD']);
+            $domain = strtolower($_SERVER['HTTP_HOST']);
             $user_agent = !isset($_SERVER['HTTP_USER_AGENT']) ? 'Unknown' : $_SERVER['HTTP_USER_AGENT'];
             $route = $_SERVER['REQUEST_URI'] === "/" ? '' : rtrim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
             $uri = $_SERVER['REQUEST_URI'];
@@ -209,6 +210,7 @@
                 'route' => $route,
                 'uri' => $uri,
                 'headers' => $headers,
+                'domain' => $domain,
                 'method' => $method,
                 'query' => $query,
                 'files' => $files,
