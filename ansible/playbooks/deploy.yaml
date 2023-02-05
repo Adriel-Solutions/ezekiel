@@ -148,6 +148,44 @@
         create: True
         state: present
 
+    - name: "Create logrotate config file"
+      file:
+        path: /etc/logrotate.d/ezekiel.{{ project_name }}.{{ item }}
+        state: touch
+        mode: "0644"
+        owner: adriel
+      with_items:
+        - nginx
+        - app
+        - php
+
+    - name: "Add config block to logrotate config file"
+      blockinfile:
+        path: /etc/logrotate.d/ezekiel.{{ project_name }}.{{ item }}
+        block: |
+          /var/www/html/{{ project_name }}/current/storage/logs/{{ item }}/*.log {
+            daily
+            missingok
+            rotate 14
+            compress
+            delaycompress
+            notifempty
+            create 0640 www-data adm
+            sharedscripts
+            prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                    run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi \
+            endscript
+            postrotate
+                invoke-rc.d nginx rotate >/dev/null 2>&1
+            endscript
+        }
+      with_items:
+        - nginx
+        - app
+        - php
+
     - name: Upload dotenv configuration for production
       copy:
         src: "{{ playbook_dir }}/../../configuration/.production.env"
