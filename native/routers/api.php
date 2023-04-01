@@ -41,10 +41,12 @@
                             return $res->send_malformed();
                     }
 
-                    $files = glob(cache_folder() . '/*.html');
-                    foreach($files as $file) {
-                        if(!is_file($file)) continue;
-                        unlink($file);
+                    $it = new \RecursiveDirectoryIterator(cache_folder());
+                    $filtered = array("html");
+                    foreach(new \RecursiveIteratorIterator($it) as $file) {
+                        $ext = pathinfo($file, PATHINFO_EXTENSION);
+                        if( in_array($ext, $filtered) && is_file($file) )
+                            unlink($file);
                     }
 
                     $res->send_success();
